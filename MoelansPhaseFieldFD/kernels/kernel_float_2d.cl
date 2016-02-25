@@ -33,31 +33,39 @@ inline float4 laplacian_2d(__read_only image2d_t Phi,
 }
 
 
-
-__kernel void brac_2d(__read_only image2d_t Phi,
-					  __write_only image2d_t Bracket,
-					  const float a_2,
-					  const float a_4,
-					  const float K,
-					  const float dx)
+inline float4 cahn_hilliard_2d(__read_only image2d_t M,
+                               __read_only image2d_t U,
+                               float4 m,
+                               float4 u,
+                               const float dx,
+                               float2 normalizedCoord,
+                               int2 size)
 {
-	// Get pixel coordinates
-    int2 coord = {get_global_id(0),get_global_id(1)};
-	int2 size = {get_global_size(0),get_global_size(1)};
-    float2 normalizedCoord = (float2)((float)coord.x/size.x, (float)coord.y/size.y);
-//    float2 normalizedCoord = (float2)((coord.x+0.5f)/size.x, (coord.y+0.5f)/size.y);
+    // Get increments in x,y
+    float incrementx = 1.0f/size.x;
+    float incrementy = 1.0f/size.y;
     
-    // Read in Phi
-    float4 phi = (read_imagef(Phi, sampler, normalizedCoord).x);
+    // Calculate stencils
+    float4 mxm= (read_imagef(M,sampler,(normalizedCoord+(float2){-incrementx,0})));
+    float4 mxp= (read_imagef(M,sampler,(normalizedCoord+(float2){incrementx,0})));
+    float4 mym= (read_imagef(M,sampler,(normalizedCoord+(float2){0,-incrementy})));
+    float4 myp= (read_imagef(M,sampler,(normalizedCoord+(float2){0,incrementy})));
     
-    // Calculate Laplacian of Phi
-    float4 laplacian = laplacian_2d(Phi, phi, dx, normalizedCoord, size);
-    
-    // Calculate terms in bracket
-    float4 bracket = - 2.0f * K * laplacian + a_2 * phi + a_4 * phi * phi * phi;
-    
-    // Write result to memory object
-    write_imagef(Bracket,coord,bracket);
+    float4 uxm= (read_imagef(U,sampler,(normalizedCoord+(float2){-incrementx,0})));
+    float4 uxp= (read_imagef(U,sampler,(normalizedCoord+(float2){incrementx,0})));
+    float4 uym= (read_imagef(U,sampler,(normalizedCoord+(float2){0,-incrementy})));
+    float4 uyp= (read_imagef(U,sampler,(normalizedCoord+(float2){0,incrementy})));
+#ifndef __NINE_STENCIL__
+    return ((mxp+m)*(uxp-u) - (m+mxm)*(u-uxm) + (myp+m)*(uyp-u) - (m+mym)*(u-uym))/(2*dx*dx);  // 5-point stencil
+#else
+//    float4 xym= (read_imagef(Phi,sampler,(normalizedCoord+(float2){-incrementx,-incrementy})));
+//    float4 xyp= (read_imagef(Phi,sampler,(normalizedCoord+(float2){incrementx,incrementy})));
+//    float4 xpym= (read_imagef(Phi,sampler,(normalizedCoord+(float2){incrementx,-incrementy})));
+//    float4 xmyp= (read_imagef(Phi,sampler,(normalizedCoord+(float2){-incrementx,incrementy})));
+//    
+//    return ((xm+xp+ym+yp)/2.0f + (xyp+xym+xmyp+xpym)/4.0f - 3.0f*phi)/(dx*dx); // 9-point stencil
+#undef __NINE_STENCIL__
+#endif
 }
 
 
