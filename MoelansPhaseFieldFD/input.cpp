@@ -6,6 +6,8 @@
 
 #include "input.hpp"
 
+
+/******************** String processing functions ********************/
 inline std::string trim_comment(const std::string & s, const std::string & delimiter="#")
 {
     if (s.empty())
@@ -52,12 +54,20 @@ inline bool parse_parameter(const std::string & line, std::string & key, std::st
 	}
 }
 
-template <typename T>
-void readfile(const std::string & filename, 
-				unsigned int & nx, unsigned int & ny, unsigned int & nz, unsigned int & nt,
-				T & dx, T & dt,
-				T & a_2, T & a_4, T & M, T & K, 
-				unsigned int & t_skip)
+
+/*****************************************************************/
+
+/******************** Actual reading function ********************/
+
+template <typename Type>
+void readfile(const std::string & filename,
+              unsigned int & nx, unsigned int & ny, unsigned int & nz, unsigned int & nt,
+              Type & dx, Type & dt,
+              Type & Da, Type & Db, Type & sigma, Type & l, Type & T_start, Type & dT_dt,
+              unsigned int & t_skip,
+              Type & PHI_MIN, Type & COMP_MIN, Type & T_MIN,
+              Type & PHI_INC, Type & COMP_INC, Type & T_INC,
+              size_t & PHI_NUM, size_t & COMP_NUM, size_t & T_NUM)
 {
 	std::ifstream fin;
 	std::string s;
@@ -77,11 +87,11 @@ void readfile(const std::string & filename,
 		{
 			if (key == "dx")
 			{
-				dx = (T)std::stod(value);
+				dx = (Type)std::stod(value);
 			}
 			else if (key == "dt")
 			{
-				dt = (T)std::stod(value);
+				dt = (Type)std::stod(value);
 			}
 			else if (key == "nx")
 			{
@@ -99,26 +109,70 @@ void readfile(const std::string & filename,
 			{
 				nt = (unsigned int)std::stoul(value);
 			}
-			else if (key == "a_2")
+			else if (key == "Da")
 			{
-				a_2 = (T)std::stod(value);
+				Da = (Type)std::stod(value);
 			}
-			else if (key == "a_4")
+			else if (key == "Db")
 			{
-				a_4 = (T)std::stod(value);
+				Db = (Type)std::stod(value);
 			}
-			else if (key == "M")
+			else if (key == "sigma")
 			{
-				M = (T)std::stod(value);
+				sigma = (Type)std::stod(value);
 			}
-			else if (key == "K")
+			else if (key == "l")
 			{
-				K = (T)std::stod(value);
+				l = (Type)std::stod(value);
 			}
+            else if (key == "T_start")
+            {
+                T_start = (Type)std::stod(value);
+            }
+            else if (key == "dT_dt")
+            {
+                dT_dt = (Type)std::stod(value);
+            }
 			else if (key == "t_skip")
 			{
 				t_skip = (unsigned int)std::stoul(value);
 			}
+            else if (key == "PHI_MIN")
+            {
+                PHI_MIN = (Type)std::stod(value);
+            }
+            else if (key == "COMP_MIN")
+            {
+                COMP_MIN = (Type)std::stod(value);
+            }
+            else if (key == "T_MIN")
+            {
+                T_MIN = (Type)std::stod(value);
+            }
+            else if (key == "PHI_INC")
+            {
+                PHI_INC = (Type)std::stod(value);
+            }
+            else if (key == "COMP_INC")
+            {
+                COMP_INC = (Type)std::stod(value);
+            }
+            else if (key == "T_INC")
+            {
+                T_INC = (Type)std::stod(value);
+            }
+            else if (key == "PHI_NUM")
+            {
+                PHI_NUM = (unsigned int)std::stoul(value);
+            }
+            else if (key == "COMP_NUM")
+            {
+                COMP_NUM = (unsigned int)std::stoul(value);
+            }
+            else if (key == "T_NUM")
+            {
+                T_NUM = (unsigned int)std::stoul(value);
+            }
 			else std::cout << key << " = " << value << " not understood!" << std::endl;
 		}	
 	}
@@ -126,31 +180,59 @@ void readfile(const std::string & filename,
 
 	// Print inputs read in
 	std::cout << "------- Inputs -------" << std::endl;
+    
+    std::cout << "*** Simulation parameters ***\n";
 	std::cout << "nx = " << nx << std::endl;
 	std::cout << "ny = " << ny << std::endl;
     std::cout << "nz = " << nz << std::endl;
 	std::cout << "nt = " << nt << std::endl;
 	std::cout << "dx = " << dx << std::endl;
 	std::cout << "dt = " << dt << std::endl;
-	std::cout << "a_2 = " << a_2 << std::endl;
-	std::cout << "a_4 = " << a_4 << std::endl;
-	std::cout << "M = " << M << std::endl;
-	std::cout << "K = " << K << std::endl;
+    
+    std::cout << "*** Physical parameters ***\n";
+	std::cout << "Da = " << Da << std::endl;
+	std::cout << "Db = " << Db << std::endl;
+	std::cout << "sigma = " << sigma << std::endl;
+	std::cout << "l = " << l << std::endl;
+    std::cout << "T_start = " << T_start << std::endl;
+    std::cout << "dT_dt = " << dT_dt << std::endl;
+    
+    std::cout << "*** Output parameters ***\n";
 	std::cout << "t_skip = " << t_skip << std::endl;
+    
+    std::cout << "*** Interpolation parameters ***\n";
+    std::cout << "PHI_MIN = " << PHI_MIN << std::endl;
+    std::cout << "COMP_MIN = " << COMP_MIN << std::endl;
+    std::cout << "T_MIN = " << T_MIN << std::endl;
+    std::cout << "PHI_INC = " << PHI_INC << std::endl;
+    std::cout << "COMP_INC = " << COMP_INC << std::endl;
+    std::cout << "T_INC = " << T_INC << std::endl;
+    std::cout << "PHI_NUM = " << PHI_NUM << std::endl;
+    std::cout << "COMP_NUM = " << COMP_NUM << std::endl;
+    std::cout << "T_NUM = " << T_NUM << std::endl;
+    
 	std::cout << "------- End -------" << std::endl;
 }
 
-template void readfile<double>(const std::string & filename, 
-                unsigned int & nx, unsigned int & ny, unsigned int & nz, unsigned int & nt,
-                double & dx, double & dt,
-                double & a_2, double & a_4, double & M, double & K, 
-                unsigned int & t_skip);
 
-template void readfile<float>(const std::string & filename, 
-                unsigned int & nx, unsigned int & ny, unsigned int & nz, unsigned int & nt, 
-                float & dx, float & dt,
-                float & a_2, float & a_4, float & M, float & K, 
-                unsigned int & t_skip);
+/******************** Explicit instantiation ********************/
+template void readfile<double>(const std::string & filename,
+                               unsigned int & nx, unsigned int & ny, unsigned int & nz, unsigned int & nt,
+                               double & dx, double & dt,
+                               double & Da, double & Db, double & sigma, double & l, double & T_start, double & dT_dt,
+                               unsigned int & t_skip,
+                               double & PHI_MIN, double & COMP_MIN, double & T_MIN,
+                               double & PHI_INC, double & COMP_INC, double & T_INC,
+                               size_t & PHI_NUM, size_t & COMP_NUM, size_t & T_NUM);
+
+template void readfile<float>(const std::string & filename,
+                              unsigned int & nx, unsigned int & ny, unsigned int & nz, unsigned int & nt,
+                              float & dx, float & dt,
+                              float & Da, float & Db, float & sigma, float & l, float & T_start, float & dT_dt,
+                              unsigned int & t_skip,
+                              float & PHI_MIN, float & COMP_MIN, float & T_MIN,
+                              float & PHI_INC, float & COMP_INC, float & T_INC,
+                              size_t & PHI_NUM, size_t & COMP_NUM, size_t & T_NUM);
 
 
 

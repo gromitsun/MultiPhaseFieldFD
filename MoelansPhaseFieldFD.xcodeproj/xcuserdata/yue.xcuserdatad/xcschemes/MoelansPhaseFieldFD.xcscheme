@@ -63,7 +63,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "/Users/yue/Dropbox/Research/codes/phasefield/OpenCL/CahnHilliardFD/CahnHilliardFD/input"
+            argument = "input"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

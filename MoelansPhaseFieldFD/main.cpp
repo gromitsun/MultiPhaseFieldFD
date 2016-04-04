@@ -36,17 +36,20 @@ int main(int argc, const char * argv[])
     
     if (sim_dim == 2)
     {
-        Simulator_2D<float> sim{};
+        Simulator_2D<double> sim{};
         
         // Read input parameters
         sim.read_input(argv[1]);
         
-        
         sim.init_cl(CL_DEVICE_TYPE_GPU, 1);
         
-        sim.build_kernel("kernel_float_2d.cl");
-        
         sim.init_sim(0, 0.001);
+
+        sim.read_init_cond("/Users/yue/Dropbox/Research/codes/phasefield/OpenCL/MoelansPhaseFieldFD_buffer/MoelansPhaseFieldFD/phi.bin", "/Users/yue/Dropbox/Research/codes/phasefield/OpenCL/MoelansPhaseFieldFD_buffer/MoelansPhaseFieldFD/comp.bin");
+        sim.read_compa("/Users/yue/data/AlCu_gibbs_3/data.bin");
+        sim.read_deltacompeq("/Users/yue/data/AlCu_gibbs/deltaxeq.bin");
+        
+        sim.build_kernel("kernel_double_2d.cl");
         
         sim.run();
         
@@ -61,9 +64,9 @@ int main(int argc, const char * argv[])
     
     sim.init_cl(CL_DEVICE_TYPE_GPU, 1);
     
-    sim.build_kernel("kernel_float_3d.cl");
-    
     sim.init_sim(0, 0.001);
+    
+    sim.build_kernel("kernel_float_3d.cl");    
     
     sim.run();
     

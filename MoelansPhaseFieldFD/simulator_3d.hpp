@@ -11,18 +11,18 @@
 
 #include "simulator.hpp"
 
-template <typename T>
-class Simulator_3D : public Simulator<T>
+template <typename Type>
+class Simulator_3D : public Simulator<Type>
 {
 private:
     // physical parameters
-    T _a_2;
-    T _a_4;
-    T _M;
-    T _K;
+    Type _a_2;
+    Type _a_4;
+    Type _M;
+    Type _K;
     // simulation parameters
-    T _dx;
-    T _dt;
+    Type _dx;
+    Type _dt;
     unsigned int _nt;
     unsigned int _t_skip;
     
@@ -46,22 +46,22 @@ public:
     Simulator_3D(const unsigned int & nx,
                  const unsigned int & ny,
                  const unsigned int & nz,
-                 const T & a_2,
-                 const T & a_4,
-                 const T & M,
-                 const T & K,
+                 const Type & a_2,
+                 const Type & a_4,
+                 const Type & M,
+                 const Type & K,
                  const unsigned int & t_skip);
     ~Simulator_3D();
     
     void read_input(const char * filename);
     
     cl_int build_kernel(const char * kernel_file="kernel_float_3d.cl");
-    void init_sim(const T & mean, const T & sigma);
+    void init_sim(const Type & mean, const Type & sigma);
     cl_int write_mem();
     cl_int read_mem();
     
-    void step(const T & dt);
-    void steps(const T & dt, const unsigned int & nsteps, const bool finish=true, const bool cputime=true);
+    void step(const Type & dt);
+    void steps(const Type & dt, const unsigned int & nsteps, const bool finish=true, const bool cputime=true);
     
     void run();
 };

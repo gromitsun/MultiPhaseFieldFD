@@ -9,16 +9,17 @@
 /* Begin PBXBuildFile section */
 		8A3AEBB71B67CFB000B75949 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A3AEBB61B67CFB000B75949 /* main.cpp */; };
 		8A3AEBC81B67D15200B75949 /* input.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A3AEBBE1B67D15200B75949 /* input.cpp */; };
-		8A3AEBC91B67D15200B75949 /* kernel_float_2d.cl in Sources */ = {isa = PBXBuildFile; fileRef = 8A3AEBC11B67D15200B75949 /* kernel_float_2d.cl */; };
-		8A3AEBCA1B67D15200B75949 /* kernel_float_3d.cl in Sources */ = {isa = PBXBuildFile; fileRef = 8A3AEBC21B67D15200B75949 /* kernel_float_3d.cl */; };
 		8A3AEBCC1B67D15200B75949 /* simulator_2d.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A3AEBC41B67D15200B75949 /* simulator_2d.cpp */; };
 		8A3AEBCD1B67D15200B75949 /* simulator_3d.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A3AEBC61B67D15200B75949 /* simulator_3d.cpp */; };
 		8A3AEBE01B67DD7F00B75949 /* cl_common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A3AEBD01B67DD7F00B75949 /* cl_common.cpp */; };
 		8A3AEBE41B67DD7F00B75949 /* randn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A3AEBD91B67DD7F00B75949 /* randn.cpp */; };
 		8A3AEBE61B67DD7F00B75949 /* simulator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A3AEBDC1B67DD7F00B75949 /* simulator.cpp */; };
 		8A3AEBE71B67DD7F00B75949 /* util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A3AEBDE1B67DD7F00B75949 /* util.cpp */; };
-		8A3AEBE81B67DE4F00B75949 /* kernel_float_2d.cl in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8A3AEBC11B67D15200B75949 /* kernel_float_2d.cl */; };
-		8A3AEBE91B67DE4F00B75949 /* kernel_float_3d.cl in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8A3AEBC21B67D15200B75949 /* kernel_float_3d.cl */; };
+		8ABEC1D01C9C87D200E7B53C /* kernel_double_2d.cl in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8AA0499B1C9B168F00511A09 /* kernel_double_2d.cl */; };
+		8ABEC1D11C9C87D200E7B53C /* alcu_gibbs.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8A85FE391C85DF8A00AC587D /* alcu_gibbs.hpp */; };
+		8ABEC1D21C9C87D200E7B53C /* kernel_float_3d.cl in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8A3AEBC21B67D15200B75949 /* kernel_float_3d.cl */; };
+		8ABEC1D41C9C883A00E7B53C /* input in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8ABEC1D31C9C87EF00E7B53C /* input */; };
+		8AD4795A1CA1D44700F6BE67 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8AD479591CA1D44700F6BE67 /* OpenCL.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -28,8 +29,10 @@
 			dstPath = "";
 			dstSubfolderSpec = 7;
 			files = (
-				8A3AEBE81B67DE4F00B75949 /* kernel_float_2d.cl in CopyFiles */,
-				8A3AEBE91B67DE4F00B75949 /* kernel_float_3d.cl in CopyFiles */,
+				8ABEC1D41C9C883A00E7B53C /* input in CopyFiles */,
+				8ABEC1D01C9C87D200E7B53C /* kernel_double_2d.cl in CopyFiles */,
+				8ABEC1D11C9C87D200E7B53C /* alcu_gibbs.hpp in CopyFiles */,
+				8ABEC1D21C9C87D200E7B53C /* kernel_float_3d.cl in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -38,12 +41,11 @@
 /* Begin PBXFileReference section */
 		8A3AEBB31B67CFB000B75949 /* MoelansPhaseFieldFD */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = MoelansPhaseFieldFD; sourceTree = BUILT_PRODUCTS_DIR; };
 		8A3AEBB61B67CFB000B75949 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		8A3AEBBE1B67D15200B75949 /* input.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = input.cpp; sourceTree = "<group>"; };
-		8A3AEBBF1B67D15200B75949 /* input.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = input.hpp; sourceTree = "<group>"; };
-		8A3AEBC11B67D15200B75949 /* kernel_float_2d.cl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.opencl; path = kernel_float_2d.cl; sourceTree = "<group>"; };
+		8A3AEBBE1B67D15200B75949 /* input.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = input.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
+		8A3AEBBF1B67D15200B75949 /* input.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; lineEnding = 0; path = input.hpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		8A3AEBC21B67D15200B75949 /* kernel_float_3d.cl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.opencl; path = kernel_float_3d.cl; sourceTree = "<group>"; };
-		8A3AEBC41B67D15200B75949 /* simulator_2d.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = simulator_2d.cpp; sourceTree = "<group>"; };
-		8A3AEBC51B67D15200B75949 /* simulator_2d.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = simulator_2d.hpp; sourceTree = "<group>"; };
+		8A3AEBC41B67D15200B75949 /* simulator_2d.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; path = simulator_2d.cpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
+		8A3AEBC51B67D15200B75949 /* simulator_2d.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; lineEnding = 0; path = simulator_2d.hpp; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		8A3AEBC61B67D15200B75949 /* simulator_3d.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = simulator_3d.cpp; sourceTree = "<group>"; };
 		8A3AEBC71B67D15200B75949 /* simulator_3d.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = simulator_3d.hpp; sourceTree = "<group>"; };
 		8A3AEBD01B67DD7F00B75949 /* cl_common.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cl_common.cpp; sourceTree = "<group>"; };
@@ -54,6 +56,10 @@
 		8A3AEBDD1B67DD7F00B75949 /* simulator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = simulator.hpp; sourceTree = "<group>"; };
 		8A3AEBDE1B67DD7F00B75949 /* util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = util.cpp; sourceTree = "<group>"; };
 		8A3AEBDF1B67DD7F00B75949 /* util.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = util.hpp; sourceTree = "<group>"; };
+		8A85FE391C85DF8A00AC587D /* alcu_gibbs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = alcu_gibbs.hpp; sourceTree = "<group>"; };
+		8AA0499B1C9B168F00511A09 /* kernel_double_2d.cl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.opencl; lineEnding = 2; path = kernel_double_2d.cl; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.opencl; };
+		8ABEC1D31C9C87EF00E7B53C /* input */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = input; sourceTree = "<group>"; };
+		8AD479591CA1D44700F6BE67 /* OpenCL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenCL.framework; path = System/Library/Frameworks/OpenCL.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +67,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8AD4795A1CA1D44700F6BE67 /* OpenCL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -74,6 +81,7 @@
 				8A3AEBCE1B67DD7F00B75949 /* cl_common */,
 				8A3AEBD51B67DD7F00B75949 /* sim_common */,
 				8A3AEBB41B67CFB000B75949 /* Products */,
+				8AD479591CA1D44700F6BE67 /* OpenCL.framework */,
 			);
 			sourceTree = "<group>";
 		};
@@ -88,6 +96,7 @@
 		8A3AEBB51B67CFB000B75949 /* MoelansPhaseFieldFD */ = {
 			isa = PBXGroup;
 			children = (
+				8ABEC1D31C9C87EF00E7B53C /* input */,
 				8A3AEBBE1B67D15200B75949 /* input.cpp */,
 				8A3AEBBF1B67D15200B75949 /* input.hpp */,
 				8A3AEBC01B67D15200B75949 /* kernels */,
@@ -103,7 +112,8 @@
 		8A3AEBC01B67D15200B75949 /* kernels */ = {
 			isa = PBXGroup;
 			children = (
-				8A3AEBC11B67D15200B75949 /* kernel_float_2d.cl */,
+				8AA0499B1C9B168F00511A09 /* kernel_double_2d.cl */,
+				8A85FE391C85DF8A00AC587D /* alcu_gibbs.hpp */,
 				8A3AEBC21B67D15200B75949 /* kernel_float_3d.cl */,
 			);
 			path = kernels;
@@ -193,10 +203,8 @@
 				8A3AEBE71B67DD7F00B75949 /* util.cpp in Sources */,
 				8A3AEBE61B67DD7F00B75949 /* simulator.cpp in Sources */,
 				8A3AEBCD1B67D15200B75949 /* simulator_3d.cpp in Sources */,
-				8A3AEBC91B67D15200B75949 /* kernel_float_2d.cl in Sources */,
 				8A3AEBE01B67DD7F00B75949 /* cl_common.cpp in Sources */,
 				8A3AEBB71B67CFB000B75949 /* main.cpp in Sources */,
-				8A3AEBCA1B67D15200B75949 /* kernel_float_3d.cl in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

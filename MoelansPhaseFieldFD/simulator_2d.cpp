@@ -13,165 +13,269 @@
 #include "cl_common.hpp"
 #include "input.hpp"
 #include "randn.hpp"
+#include "util.hpp"
 
 
+#define GET_T_IND(T) ((int)((T-_T_MIN)/_T_INC))
 
-template <typename T>
-Simulator_2D<T>::Simulator_2D() : Simulator<T>(0, 0, 0, 0) {}
+/******************** class initializers ********************/
 
-
-template <typename T>
-Simulator_2D<T>::Simulator_2D(const unsigned int & nx,
-                              const unsigned int & ny) : Simulator<T>(nx, ny, 1, 2) {}
+template <typename Type>
+Simulator_2D<Type>::Simulator_2D() : Simulator<Type>(0, 0, 0, 0) {}
 
 
-template <typename T>
-Simulator_2D<T>::Simulator_2D(const unsigned int & nx,
-                              const unsigned int & ny,
-                              const T & a_2,
-                              const T & a_4,
-                              const T & M,
-                              const T & K,
-                              const unsigned int & t_skip) : Simulator<T>(nx, ny, 1, 2)
+template <typename Type>
+Simulator_2D<Type>::Simulator_2D(const unsigned int nx,
+                                 const unsigned int ny) : Simulator<Type>(nx, ny, 1, 2) {}
+
+
+template <typename Type>
+Simulator_2D<Type>::Simulator_2D(const unsigned int nx,
+                                 const unsigned int ny,
+                                 const Type dx,
+                                 const Type dt,
+                                 const Type Da,
+                                 const Type Db,
+                                 const Type sigma,
+                                 const Type l,
+                                 const Type T_start,
+                                 const Type dT_dt,
+                                 const unsigned int t_skip,
+                                 const Type PHI_MIN,
+                                 const Type COMP_MIN,
+                                 const Type T_MIN,
+                                 const Type PHI_INC,
+                                 const Type COMP_INC,
+                                 const Type T_INC,
+                                 const size_t PHI_NUM,
+                                 const size_t COMP_NUM,
+                                 const size_t T_NUM) : Simulator<Type>(nx, ny, 1, 2)
 {
-    _a_2 = a_2;
-    _a_4 = a_4;
-    _M = M;
-    _K = K;
+    /* Input parameters */
+    // simulation parameters
+    _dx = dx;
+    _dt = dt;
+    
+    // physical parameters
+    _Da = Da;
+    _Db = Db;
+    _sigma = sigma;
+    _l = l;
+    _T = T_start;
+    _dT_dt = dT_dt;
     _t_skip = t_skip;
+
+    // interpolation parameters
+    _PHI_MIN = PHI_MIN;
+    _COMP_MIN = COMP_MIN;
+    _T_MIN = T_MIN;
+    _PHI_INC = PHI_INC;
+    _COMP_INC = COMP_INC;
+    _T_INC = T_INC;
+    _PHI_NUM = PHI_NUM;
+    _COMP_NUM = COMP_NUM;
+    _T_NUM = T_NUM;
+
+    // phase field parameters
+    _gamma = 1.5;    // = 1.5
+    _kappa = 0.75*_sigma*_l;    // = 0.75*sigma*l
+    _mk = 6*_sigma/_l;       // = 6*sigma/l
 }
 
 
-template <typename T>
-Simulator_2D<T>::~Simulator_2D()
+template <typename Type>
+Simulator_2D<Type>::~Simulator_2D()
 {
-    if (Simulator<T>::_cl_initialized)
+    if (Simulator<Type>::_cl_initialized)
     {
-        clReleaseKernel(_kernel_brac_2d);
         clReleaseKernel(_kernel_step_2d);
-        clReleaseMemObject(_img_Phi);
-        clReleaseMemObject(_img_Bracket);
-        clReleaseMemObject(_img_PhiNext);
-        clReleaseMemObject(_rotate_var);
+        clReleaseMemObject(_mem_Phi);
+        clReleaseMemObject(_mem_Comp);
+        clReleaseMemObject(_mem_CompA);
+        clReleaseMemObject(_mem_DeltaCompEq);
     }
     
-    delete [] Simulator<T>::_data;
+    delete [] Simulator<Type>::_data;
 }
 
+/************************************************************/
 
+/******************** loading data from file ********************/
 
-template <typename T>
-void Simulator_2D<T>::read_input(const char * filename)
+template <typename Type>
+void Simulator_2D<Type>::read_input(const char * filename)
 {
-    readfile(filename, Simulator<T>::_dim.x, Simulator<T>::_dim.y, Simulator<T>::_dim.z,
-             _nt, _dx, _dt, _a_2, _a_4, _M, _K, _t_skip);
-    Simulator<T>::_size = Simulator<T>::_dim.x * Simulator<T>::_dim.y;
+    readfile(filename, Simulator<Type>::_dim.x, Simulator<Type>::_dim.y, Simulator<Type>::_dim.z,
+             _nt, _dx, _dt, _Da, _Db, _sigma, _l, _T, _dT_dt, _t_skip,
+             _PHI_MIN, _COMP_MIN, _T_MIN, _PHI_INC, _COMP_INC, _T_INC, _PHI_NUM, _COMP_NUM, _T_NUM);
+    Simulator<Type>::_size = Simulator<Type>::_dim.x * Simulator<Type>::_dim.y;
+
+    // phase field parameters
+    _gamma = 1.5;    // = 1.5
+    _kappa = 0.75*_sigma*_l;    // = 0.75*sigma*l
+    _mk = 6*_sigma/_l;       // = 6*sigma/l
 }
 
 
-template <typename T>
-cl_int Simulator_2D<T>::build_kernel(const char * kernel_file)
+template <typename Type>
+void Simulator_2D<Type>::read_init_cond(const char * filename_phi, const char * filename_comp)
+{
+    read_from_bin(filename_phi, _Phi, this->_size);
+    read_from_bin(filename_comp, _Comp, this->_size);
+}
+
+
+template <typename Type>
+void Simulator_2D<Type>::read_compa(const char * filename)
+{
+    read_from_bin(filename, _CompA, this->_size);
+}
+
+
+template <typename Type>
+void Simulator_2D<Type>::read_deltacompeq(const char * filename)
+{
+    read_from_bin(filename, _DeltaCompEq, this->_size);
+}
+
+/************************************************************/
+
+/******************** data transfer between host and device ********************/
+
+template <typename Type>
+cl_int Simulator_2D<Type>::write_mem()
+{
+    CHECK_ERROR(this->WriteArrayToBuffer(_mem_Phi, _Phi, _global_size[0], _global_size[1], _global_size[2]));
+    CHECK_ERROR(this->WriteArrayToBuffer(_mem_Comp, _Comp, _global_size[0], _global_size[1], _global_size[2]));
+    return CL_SUCCESS;
+}
+
+
+template <typename Type>
+cl_int Simulator_2D<Type>::read_mem()
+{
+    CHECK_ERROR(this->ReadArrayFromBuffer(_mem_Phi, _Phi, _global_size[0], _global_size[1], _global_size[2]));
+    CHECK_ERROR(this->ReadArrayFromBuffer(_mem_Comp, _Comp, _global_size[0], _global_size[1], _global_size[2]));
+    return CL_SUCCESS;
+}
+
+
+template <typename Type>
+cl_int Simulator_2D<Type>::write_compa()
+{
+    CHECK_ERROR(this->WriteArrayToBuffer(_mem_CompA, &_CompA[GET_T_IND(_T)], _PHI_NUM, _COMP_NUM, 2));
+    return CL_SUCCESS;
+}
+
+
+template <typename Type>
+cl_int Simulator_2D<Type>::write_compa(const size_t i_start, const size_t nstacks)
+{
+    CHECK_ERROR(this->WriteArrayToBuffer(_mem_CompA, &_CompA[i_start], _PHI_NUM, _COMP_NUM, nstacks));
+    return CL_SUCCESS;
+}
+
+template <typename Type>
+cl_int Simulator_2D<Type>::write_deltacompeq()
+{
+    CHECK_ERROR(this->WriteArrayToBuffer(_mem_DeltaCompEq, _DeltaCompEq, _T_NUM));
+    return CL_SUCCESS;
+}
+
+/************************************************************/
+
+/******************** initialize simulation ********************/
+
+template <typename Type>
+cl_int Simulator_2D<Type>::build_kernel(const char * kernel_file)
 
 {
     cl_int err;
     cl_program program;
 
     // Build program with source (filename) on device+context
-    CHECK_RETURN_N(program, CreateProgram(Simulator<T>::context, Simulator<T>::device, kernel_file, err), err);
-    CHECK_RETURN_N(_kernel_brac_2d, clCreateKernel(program, "brac_2d", &err), err);
+    CHECK_RETURN_N(program, CreateProgram(Simulator<Type>::context, Simulator<Type>::device, kernel_file, err), err);
     CHECK_RETURN_N(_kernel_step_2d, clCreateKernel(program, "step_2d", &err), err);
 
-    //Create Images;
-   
-    cl_image_desc r_desc;
-    r_desc.image_type=CL_MEM_OBJECT_IMAGE2D;
-    r_desc.image_width=Simulator<T>::_dim.x;
-    r_desc.image_height=Simulator<T>::_dim.y;
-    r_desc.image_depth=1;
-    r_desc.image_row_pitch=0;
-    r_desc.image_slice_pitch=0;
-    r_desc.num_mip_levels=0;
-    r_desc.num_samples=0;
-    r_desc.buffer=NULL;
+    //Create memory objects on device;
     
-    cl_image_format fmt;
-    fmt.image_channel_data_type=CL_FLOAT; /* DOES NOT WORK WITH DOUBLE */
-    fmt.image_channel_order=CL_R;
+    CHECK_RETURN_N(_mem_Phi,clCreateBuffer(Simulator<Type>::context, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, _global_size[0]*_global_size[1]*_global_size[2]*sizeof(Type), _Phi, &err),err)
+    CHECK_RETURN_N(_mem_Comp,clCreateBuffer(Simulator<Type>::context, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, _global_size[0]*_global_size[1]*_global_size[2]*sizeof(Type), _Comp, &err),err)
     
-    T *v=(T *)calloc(Simulator<T>::_size,sizeof(T));
-    for(int i=0;i<Simulator<T>::_size;i++)
-    {
-        v[i]=rand()%101/(T)100;
-    }
-    CHECK_RETURN_N(_img_Phi,clCreateImage(Simulator<T>::context, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, &fmt, &r_desc, v, &err),err)
-    CHECK_RETURN_N(_img_Bracket,clCreateImage(Simulator<T>::context, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, &fmt, &r_desc, v, &err),err)
-    CHECK_RETURN_N(_img_PhiNext,clCreateImage(Simulator<T>::context, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, &fmt, &r_desc, v, &err),err)
+    CHECK_RETURN_N(_mem_CompA,clCreateBuffer(Simulator<Type>::context, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, _PHI_NUM*_COMP_NUM*2*sizeof(Type), _CompA, &err),err)
+    CHECK_RETURN_N(_mem_DeltaCompEq,clCreateBuffer(Simulator<Type>::context, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, _T_NUM*sizeof(Type), _DeltaCompEq, &err),err)
     
-    CHECK_ERROR(clSetKernelArg(_kernel_brac_2d, 0, sizeof(cl_mem), &_img_Phi))
-    CHECK_ERROR(clSetKernelArg(_kernel_brac_2d, 1, sizeof(cl_mem), &_img_Bracket))
-    CHECK_ERROR(clSetKernelArg(_kernel_brac_2d, 2, sizeof(T), &_a_2))
-    CHECK_ERROR(clSetKernelArg(_kernel_brac_2d, 3, sizeof(T), &_a_4))
-    CHECK_ERROR(clSetKernelArg(_kernel_brac_2d, 4, sizeof(T), &_K))
-    CHECK_ERROR(clSetKernelArg(_kernel_brac_2d, 5, sizeof(T), &_dx))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_2d, 0, sizeof(cl_mem), &_mem_Phi))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_2d, 1, sizeof(cl_mem), &_mem_Comp))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_2d, 2, sizeof(cl_mem), &_mem_CompA))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_2d, 3, sizeof(cl_mem), &_mem_DeltaCompEq))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_2d, 4, sizeof(Type), &_T))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_2d, 5, sizeof(Type), &_mk))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_2d, 6, sizeof(Type), &_gamma))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_2d, 7, sizeof(Type), &_kappa))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_2d, 8, sizeof(Type), &_Da))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_2d, 9, sizeof(Type), &_Db))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_2d, 10, sizeof(Type), &_dx))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_2d, 11, sizeof(Type), &_dt))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_2d, 12, sizeof(Type), &_PHI_MIN))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_2d, 13, sizeof(Type), &_COMP_MIN))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_2d, 14, sizeof(Type), &_T_MIN))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_2d, 15, sizeof(Type), &_PHI_INC))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_2d, 16, sizeof(Type), &_COMP_INC))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_2d, 17, sizeof(Type), &_T_INC))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_2d, 18, sizeof(Type), &_PHI_NUM))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_2d, 19, sizeof(Type), &_COMP_NUM))
     
-    CHECK_ERROR(clSetKernelArg(_kernel_step_2d, 0, sizeof(cl_mem), &_img_Phi))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_2d, 1, sizeof(cl_mem), &_img_Bracket))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_2d, 2, sizeof(cl_mem), &_img_PhiNext))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_2d, 3, sizeof(T), &_M))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_2d, 4, sizeof(T), &_dx))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_2d, 5, sizeof(T), &_dt))
+    Simulator<Type>::_cl_initialized = true;
     
-    free(v);
+    return CL_SUCCESS;
+}
+
+template <typename Type>
+void Simulator_2D<Type>::init_sim(const Type mean, const Type sigma)
+{
+    /* allocate memory on host */
+    _Phi = new Type[Simulator<Type>::_size];
+    _Comp = new Type[Simulator<Type>::_size];
+    _CompA = new Type[_PHI_NUM*_COMP_NUM*2];
+    _DeltaCompEq = new Type[_T_NUM];
     
+    /* initialize Phi & Comp with random numbers */
+    gauss(_Phi, Simulator<Type>::_size, mean, sigma);
+    gauss(_Comp, Simulator<Type>::_size, mean, sigma);
+    
+    /* set OpenCL calculation sizes */
     _local_size[0]=8;
     _local_size[1]=8;
     _local_size[2]=1;
     
-    _global_size[0]=Simulator<T>::_dim.x;
-    _global_size[1]=Simulator<T>::_dim.y;
+    _global_size[0]=Simulator<Type>::_dim.x;
+    _global_size[1]=Simulator<Type>::_dim.y;
     _global_size[2]=1;
+
+    /* prepare directory for output */
+    prep_dir("output/");
     
-    Simulator<T>::_cl_initialized = true;
-    
-    return CL_SUCCESS;
 }
 
+/************************************************************/
 
-template <typename T>
-cl_int Simulator_2D<T>::write_mem()
+/******************** simulation steps ********************/
+
+template <typename Type>
+void Simulator_2D<Type>::step(const Type dt)
 {
-    CHECK_ERROR(this->WriteArray(_img_Phi, Simulator<T>::_data, _global_size[0], _global_size[1], _global_size[2]));
-    return CL_SUCCESS;
+    steps(dt, 1, 0, 0);
 }
 
 
-template <typename T>
-cl_int Simulator_2D<T>::read_mem()
-{
-    CHECK_ERROR(this->ReadArray(_img_Phi, Simulator<T>::_data, _global_size[0], _global_size[1], _global_size[2]));
-    return CL_SUCCESS;
-}
-
-
-template <typename T>
-void Simulator_2D<T>::init_sim(const T & mean, const T & sigma)
-{
-    if (Simulator<T>::_data == NULL)
-        Simulator<T>::_data = new T[Simulator<T>::_size];
-    
-    gauss(Simulator<T>::_data, Simulator<T>::_size, mean, sigma);
-    
-    write_mem();
-}
-
-
-template <typename T>
-void Simulator_2D<T>::steps(const T & dt, const unsigned int & nsteps, const bool finish, const bool cputime)
+template <typename Type>
+void Simulator_2D<Type>::steps(const Type dt, const unsigned int nsteps, const bool finish, const bool cputime)
 {
     if ((&dt != &_dt) && (dt != _dt))
     {
         _dt = dt;
-        CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_2d, 5, sizeof(T), &_dt))
+        CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_2d, 11, sizeof(Type), &_dt))
     }
     
     // Variables for timing
@@ -181,22 +285,48 @@ void Simulator_2D<T>::steps(const T & dt, const unsigned int & nsteps, const boo
     if(cputime)
         t1= getTime();
     
-    for (unsigned int t=0; t<nsteps; t++)
+    
+    Type dT = _dT_dt*_dt;
+    Type T_target = _T + dT*nsteps;
+    size_t i0 = GET_T_IND(_T);
+    size_t i1 = GET_T_IND(T_target);
+    
+    unsigned int * t_list = new unsigned int [i1-i0+1];
+    
+    for (int i=0; i<i1-i0; i++)
     {
-        // Calculate terms in the bracket
-        CHECK_ERROR_EXIT(clEnqueueNDRangeKernel(Simulator<T>::queue, _kernel_brac_2d, 2, NULL, _global_size, _local_size, 0, NULL, NULL));
-        
-        // Calculate laplacian of the bracket and do the time-stepping
-        CHECK_ERROR_EXIT(clEnqueueNDRangeKernel(Simulator<T>::queue, _kernel_step_2d, 2, NULL, _global_size, _local_size, 0, NULL, NULL));
-        
-        //ROTATE VARIABLES
-        _rotate_var=_img_Phi;
-        _img_Phi=_img_PhiNext;
-        _img_PhiNext=_rotate_var;
-        
-        CHECK_ERROR_EXIT(clSetKernelArg(_kernel_brac_2d, 0, sizeof(cl_mem), &_img_Phi));
-        CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_2d, 2, sizeof(cl_mem), &_img_PhiNext));
+        t_list[i] = (unsigned int)(((i0+i+1)*_T_INC + _T_MIN - _T)/dT);
     }
+    
+    t_list[i1-i0] = nsteps;
+    
+    
+    /* main loop */
+    
+    unsigned int t = 0;
+    for (; t<t_list[0]; t++)
+    {
+        // Do calculation
+        CHECK_ERROR_EXIT(clEnqueueNDRangeKernel(Simulator<Type>::queue, _kernel_step_2d, 2, NULL, _global_size, _local_size, 0, NULL, NULL));
+    }
+    
+    for (int i=1; i<i1-i0+1; i++)
+    {
+        write_compa(i0+i, 2);
+        for (; t<t_list[i]; t++)
+        {
+            // Do calculation
+            CHECK_ERROR_EXIT(clEnqueueNDRangeKernel(Simulator<Type>::queue, _kernel_step_2d, 2, NULL, _global_size, _local_size, 0, NULL, NULL));
+        }
+    }
+    
+    for (int jj=123;jj<123+10;jj++)
+        std::cout << _Phi[jj] <<"\t" << _Comp[jj] << std::endl;
+    
+    
+    /* change temperature */
+    _T = T_target;
+    
     
     if(cputime)
     {
@@ -205,7 +335,7 @@ void Simulator_2D<T>::steps(const T & dt, const unsigned int & nsteps, const boo
     }
     
     if(finish)
-        clFinish(Simulator<T>::queue);
+        clFinish(Simulator<Type>::queue);
     
     if(cputime)
     {
@@ -214,17 +344,17 @@ void Simulator_2D<T>::steps(const T & dt, const unsigned int & nsteps, const boo
     }
     
     //this->_disp_mem=img_Phi;
-    Simulator<T>::steps(_dt, nsteps);
+    Simulator<Type>::steps(_dt, nsteps);
     if(cputime)
         printf("It took %lfs to submit and %lfs to complete (%lfs per loops)\n",s,s2,s2/nsteps);
 }
 
 
-template <typename T>
-void Simulator_2D<T>::run()
+template <typename Type>
+void Simulator_2D<Type>::run()
 {
-    if(Simulator<T>::current_step==0)
-        Simulator<T>::writefile();
+    if(Simulator<Type>::current_step==0)
+        writefile();
     
     ttime_t t0, t1;
     
@@ -236,7 +366,7 @@ void Simulator_2D<T>::run()
         steps(_dt, _t_skip);
         read_mem();
         
-        Simulator<T>::writefile();
+        writefile();
     }
     
     t1 = getTime();
@@ -245,14 +375,29 @@ void Simulator_2D<T>::run()
     
 }
 
+template <typename Type>
+void Simulator_2D<Type>::restart(const unsigned int t)
+{
+    _T += (t-Simulator<Type>::current_step)*_dT_dt*_dt;
+    Simulator<Type>::restart(t, t*_dt);
+}
+
+/************************************************************/
+
+/******************** output ********************/
+
+template <typename Type>
+void Simulator_2D<Type>::writefile()
+{
+    write2bin(time2fname("output/phi_", this->current_step), _Phi, this->_size);
+    write2bin(time2fname("output/comp_", this->current_step), _Comp, this->_size);
+}
+
+/************************************************************/
 
 
 /* Explicit instantiation */
 template class Simulator_2D<float>;
-//template void Simulator_2D<float>::read_input(const char *);
-//template void Simulator_2D<float>::init_sim(const float &, const float &);
-//template Simulator_2D<float>::Simulator_2D();
-
 template class Simulator_2D<double>;
 
 
