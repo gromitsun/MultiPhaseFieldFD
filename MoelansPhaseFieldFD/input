@@ -4,30 +4,20 @@
 nx = 256                                    # << nx
 ny = 256                                    # << ny
 nz = 256                                    # << nz
-nt = 100000                                     # << nt
+nt = 100000                                # << nt
 dx = 0.65e-6                                # << dx
-dt = 1.25e-9                                # << dt
+dt = 2.5e-4                                 # << dt
+dT_recalc = 1;
 
 ### Physical parameters ###
-Da = 8.3e-10                                # << Da: diffusion coefficient for phase a
-Db = 0                                      # << Db: diffusion coefficient for phase b
+Da = 0                                      # << Da: diffusion coefficient for phase a
+Db = 8.3e-10                                # << Db: diffusion coefficient for phase b
 sigma = 0.5                                 # << sigma: interfacial free energy
-l = 3.25e-6 # 2.27e-9                       # << l: capillary length
-T_start = 883 # 895.15    # 622C            # << T_start
+l = 3.25e-6 # 2.27e-9                       # << l: interfacial width
+T_start = 826.15 # 895.15    # 622C         # << T_start
 dT_dt = 0      # 2C/min                     # << dT_dt
 
 ### Output parameters ###
-t_skip = 1000                                 # << t_skip
-
-### Interpolation parameters ###
-PHI_MIN = -0.4995                           # << PHI_MIN
-COMP_MIN = 0.001                            # << COMP_MIN
-T_MIN = 818.15                              # << T_MIN
-PHI_INC = 0.000957966764418                 # << PHI_INC
-COMP_INC = 0.000204301075269                # << COMP_INC
-T_INC = 1                                   # << T_INC
-PHI_NUM = 2000                              # << PHI_NUM
-COMP_NUM = 1000                             # << COMP_NUM
-T_NUM = 121                                 # << T_NUM
+t_skip = 1000                               # << t_skip
 
 # ------- End -------

@@ -15,10 +15,10 @@
 		8A3AEBE41B67DD7F00B75949 /* randn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A3AEBD91B67DD7F00B75949 /* randn.cpp */; };
 		8A3AEBE61B67DD7F00B75949 /* simulator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A3AEBDC1B67DD7F00B75949 /* simulator.cpp */; };
 		8A3AEBE71B67DD7F00B75949 /* util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A3AEBDE1B67DD7F00B75949 /* util.cpp */; };
-		8ABEC1D01C9C87D200E7B53C /* kernel_double_2d.cl in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8AA0499B1C9B168F00511A09 /* kernel_double_2d.cl */; };
-		8ABEC1D11C9C87D200E7B53C /* alcu_gibbs.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8A85FE391C85DF8A00AC587D /* alcu_gibbs.hpp */; };
 		8ABEC1D21C9C87D200E7B53C /* kernel_float_3d.cl in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8A3AEBC21B67D15200B75949 /* kernel_float_3d.cl */; };
 		8ABEC1D41C9C883A00E7B53C /* input in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8ABEC1D31C9C87EF00E7B53C /* input */; };
+		8AC4F5A11CB3FFC700800B8F /* kernel_double_2d_two_kernels.cl in Sources */ = {isa = PBXBuildFile; fileRef = 8AC4F59F1CB3FFC700800B8F /* kernel_double_2d_two_kernels.cl */; };
+		8AC4F5A21CB433A600800B8F /* kernel_double_2d_two_kernels.cl in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8AC4F59F1CB3FFC700800B8F /* kernel_double_2d_two_kernels.cl */; };
 		8AD4795A1CA1D44700F6BE67 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8AD479591CA1D44700F6BE67 /* OpenCL.framework */; };
 /* End PBXBuildFile section */
 
@@ -29,9 +29,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 7;
 			files = (
+				8AC4F5A21CB433A600800B8F /* kernel_double_2d_two_kernels.cl in CopyFiles */,
 				8ABEC1D41C9C883A00E7B53C /* input in CopyFiles */,
-				8ABEC1D01C9C87D200E7B53C /* kernel_double_2d.cl in CopyFiles */,
-				8ABEC1D11C9C87D200E7B53C /* alcu_gibbs.hpp in CopyFiles */,
 				8ABEC1D21C9C87D200E7B53C /* kernel_float_3d.cl in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -57,8 +56,9 @@
 		8A3AEBDE1B67DD7F00B75949 /* util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = util.cpp; sourceTree = "<group>"; };
 		8A3AEBDF1B67DD7F00B75949 /* util.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = util.hpp; sourceTree = "<group>"; };
 		8A85FE391C85DF8A00AC587D /* alcu_gibbs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = alcu_gibbs.hpp; sourceTree = "<group>"; };
-		8AA0499B1C9B168F00511A09 /* kernel_double_2d.cl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.opencl; lineEnding = 2; path = kernel_double_2d.cl; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.opencl; };
 		8ABEC1D31C9C87EF00E7B53C /* input */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = input; sourceTree = "<group>"; };
+		8AC4F59E1CB3FFC700800B8F /* kernel_double_2d_simple_one_kernel.cl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.opencl; path = kernel_double_2d_simple_one_kernel.cl; sourceTree = "<group>"; };
+		8AC4F59F1CB3FFC700800B8F /* kernel_double_2d_two_kernels.cl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.opencl; path = kernel_double_2d_two_kernels.cl; sourceTree = "<group>"; };
 		8AD479591CA1D44700F6BE67 /* OpenCL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenCL.framework; path = System/Library/Frameworks/OpenCL.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -99,6 +99,7 @@
 				8ABEC1D31C9C87EF00E7B53C /* input */,
 				8A3AEBBE1B67D15200B75949 /* input.cpp */,
 				8A3AEBBF1B67D15200B75949 /* input.hpp */,
+				8A85FE391C85DF8A00AC587D /* alcu_gibbs.hpp */,
 				8A3AEBC01B67D15200B75949 /* kernels */,
 				8A3AEBC41B67D15200B75949 /* simulator_2d.cpp */,
 				8A3AEBC51B67D15200B75949 /* simulator_2d.hpp */,
@@ -112,8 +113,8 @@
 		8A3AEBC01B67D15200B75949 /* kernels */ = {
 			isa = PBXGroup;
 			children = (
-				8AA0499B1C9B168F00511A09 /* kernel_double_2d.cl */,
-				8A85FE391C85DF8A00AC587D /* alcu_gibbs.hpp */,
+				8AC4F59E1CB3FFC700800B8F /* kernel_double_2d_simple_one_kernel.cl */,
+				8AC4F59F1CB3FFC700800B8F /* kernel_double_2d_two_kernels.cl */,
 				8A3AEBC21B67D15200B75949 /* kernel_float_3d.cl */,
 			);
 			path = kernels;
@@ -197,6 +198,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8AC4F5A11CB3FFC700800B8F /* kernel_double_2d_two_kernels.cl in Sources */,
 				8A3AEBE41B67DD7F00B75949 /* randn.cpp in Sources */,
 				8A3AEBC81B67D15200B75949 /* input.cpp in Sources */,
 				8A3AEBCC1B67D15200B75949 /* simulator_2d.cpp in Sources */,

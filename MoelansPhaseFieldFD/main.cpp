@@ -46,10 +46,8 @@ int main(int argc, const char * argv[])
         sim.init_sim(0, 0.001);
 
         sim.read_init_cond("/Users/yue/Dropbox/Research/codes/phasefield/OpenCL/MoelansPhaseFieldFD_buffer/MoelansPhaseFieldFD/phi.bin", "/Users/yue/Dropbox/Research/codes/phasefield/OpenCL/MoelansPhaseFieldFD_buffer/MoelansPhaseFieldFD/comp.bin");
-        sim.read_compa("/Users/yue/data/AlCu_gibbs_3/data.bin");
-        sim.read_deltacompeq("/Users/yue/data/AlCu_gibbs/deltaxeq.bin");
         
-        sim.build_kernel("kernel_double_2d.cl");
+        sim.build_kernel("kernel_double_2d_two_kernels.cl");
         
         sim.run();
         
