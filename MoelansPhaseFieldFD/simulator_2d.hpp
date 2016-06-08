@@ -10,49 +10,8 @@
 #define __MoelansPhaseFieldFD__simulator_2d__
 
 #include "simulator.hpp"
+#include "parameter_type.hpp"
 
-template <typename Type>
-struct Parameter
-{
-    /* Input parameters */
-    // physical parameters
-    Type Da;
-    Type Db;
-    Type sigma;
-    Type l;
-    Type T;
-    Type dT_dt;
-    Type T_start;
-    // phase field parameters
-    Type gamma;    // = 1.5
-    Type kappa;    // = 0.75*sigma*l
-    Type mk;       // = 6*sigma/l
-    // simulation parameters
-    Type dx;
-    Type dt;
-    unsigned int nt;
-    unsigned int t_skip; // output every t_skip steps
-    Type dT_recalc;
-};
-
-template <typename Type>
-struct Variable
-{
-    // parabolic coefficients of the free energy functions
-    Type a2;
-    Type a1;
-    Type a0;
-    Type b2;
-    Type b1;
-    Type b0;
-    // other physical variables
-    Type T;
-    Type T_gibbs;       // temperature used in Gibbs free energy functions
-    Type T_gibbs_next;
-    Type delta_comp_eq;
-    Type compa_eq;
-    Type compb_eq;
-};
 
 template <typename Type>
 class Simulator_2D : public Simulator<Type>
@@ -65,16 +24,21 @@ private:
     Variable<Type> _vars;
     
     /* Host arrays */
-    Type * _Phi;
+    Type * _PhiA;
+    Type * _PhiB;
     Type * _Comp;
+    Type * _para_coef;
+    Type * _comp_phad;
     
     
     /* OpenCL variables */
     
     // OpenCL memory objects
-    cl_mem _mem_Phi;
+    cl_mem _mem_PhiA;
+    cl_mem _mem_PhiB;
     cl_mem _mem_Comp;
-    cl_mem _mem_PhiNext;
+    cl_mem _mem_PhiANext;
+    cl_mem _mem_PhiBNext;
     cl_mem _rotate_var;
     cl_mem _mem_U;
     cl_mem _mem_M;
@@ -98,7 +62,12 @@ public:
     
     /* read input from files */
     void read_input(const char * filename);                             // read input parameters
-    void read_init_cond(const char * phi_file, const char * comp_file); // read initial condition from data
+    void read_init_cond(const char * phia_file, const char * phib_file, const char * comp_file); // read initial condition from data
+    void read_parabolic(const char * filename); // read parabolic free energy coefficients
+    void read_comp_phad(const char * filename); // read equilibrium compositions
+    
+    /* calculate derived model parameters */
+    void calc_paras();
 
     /* initialization */
     cl_int build_kernel(const char * kernel_file="kernel_float.cl");    // build OpenCL kernel

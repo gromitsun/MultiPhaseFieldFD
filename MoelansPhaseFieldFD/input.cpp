@@ -112,6 +112,10 @@ void readfile(const std::string & filename,
             {
                 paras.Db = (Type)std::stod(value);
             }
+            else if (key == "gamma")
+            {
+                paras.gamma = (Type)std::stod(value);
+            }
             else if (key == "sigma")
             {
                 paras.sigma = (Type)std::stod(value);
@@ -136,6 +140,18 @@ void readfile(const std::string & filename,
             {
                 paras.dT_recalc = (Type)std::stod(value);
             }
+            else if (key == "dT_data")
+            {
+                paras.dT_data = (Type)std::stod(value);
+            }
+            else if (key == "nT_data")
+            {
+                paras.nT_data = (Type)std::stoul(value);
+            }
+            else if (key == "T_start_data")
+            {
+                paras.T_start_data = (Type)std::stod(value);
+            }
             else std::cout << key << " = " << value << " not understood!" << std::endl;
         }    
     }
@@ -153,9 +169,15 @@ void readfile(const std::string & filename,
     std::cout << "dt = " << paras.dt << std::endl;
     std::cout << "dT_recalc = " << paras.dT_recalc << std::endl;
     
+    std::cout << "*** Parabolic coefficients parameters ***\n";
+    std::cout << "dT_data = " << paras.dT_data << std::endl;
+    std::cout << "nT_data = " << paras.nT_data << std::endl;
+    std::cout << "T_start_data = " << paras.T_start_data << std::endl;
+    
     std::cout << "*** Physical parameters ***\n";
     std::cout << "Da = " << paras.Da << std::endl;
     std::cout << "Db = " << paras.Db << std::endl;
+    std::cout << "gamma = " << paras.gamma << std::endl;
     std::cout << "sigma = " << paras.sigma << std::endl;
     std::cout << "l = " << paras.l << std::endl;
     std::cout << "T_start = " << paras.T_start << std::endl;
