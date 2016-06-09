@@ -88,7 +88,7 @@ public:
     
     void run(); // run simulation according to program
     
-    void restart(const unsigned int t); // restart from #t steps; reset step counter to t
+    void restart(const unsigned int nt); // restart from #t steps; reset step counter to t
     
     /* write output file */
     void writefile();

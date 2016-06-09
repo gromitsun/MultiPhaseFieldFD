@@ -282,8 +282,8 @@ void Simulator_3D<Type>::steps(const Type dt, const unsigned int nsteps, const b
     if ((&dt != &_paras.dt) && (dt != _paras.dt))
     {
         _paras.dt = dt;
-        CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_phi_3d, 18, sizeof(Type), &_paras.dt))
-        CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_comp_3d, 5, sizeof(Type), &_paras.dt))
+        CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_phi_3d, 20, sizeof(Type), &_paras.dt))
+        CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_comp_3d, 4, sizeof(Type), &_paras.dt))
     }
     
     // Variables for timing
@@ -492,10 +492,18 @@ void Simulator_3D<Type>::run()
 }
 
 template <typename Type>
-void Simulator_3D<Type>::restart(const unsigned int t)
+void Simulator_3D<Type>::restart(const unsigned int nt)
 {
-    _paras.T += (t-Simulator<Type>::current_step)*_paras.dT_dt*_paras.dt;
-    Simulator<Type>::restart(t, t*_paras.dt);
+    double t = nt * _paras.dt;
+    double T = nt * _paras.dT_dt * _paras.dt;
+    _vars.T_gibbs = (int)(T / _paras.dT_recalc) * _paras.dT_recalc;
+    std::cout << "Restarting from step = " << nt 
+              << ", t = " << t
+              << ", T = " << T
+              << ", T_gibbs = " << _vars.T_gibbs << std::endl;
+    set_temp(_vars.T_gibbs);
+    _vars.T = T;
+    Simulator<Type>::restart(nt, t);
 }
 
 /************************************************************/

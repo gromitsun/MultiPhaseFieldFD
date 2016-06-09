@@ -48,7 +48,7 @@ int main(int argc, const char * argv[])
         sim.init_sim(0, 0.001);
 
         sim.read_init_cond("/Users/yue/Dropbox/Research/codes/phasefield/OpenCL/MoelansPhaseFieldFD_buffer/MoelansPhaseFieldFD/phia.bin", 
-            "/Users/yue/Dropbox/Research/codes/phasefield/OpenCL/MoelansPhaseFieldFD_buffer/MoelansPhaseFieldFD/phib.bin",
+//             "/Users/yue/Dropbox/Research/codes/phasefield/OpenCL/MoelansPhaseFieldFD_buffer/MoelansPhaseFieldFD/phib.bin",
             "/Users/yue/Dropbox/Research/codes/phasefield/OpenCL/MoelansPhaseFieldFD_buffer/MoelansPhaseFieldFD/comp.bin");
         sim.read_parabolic("/Users/yue/Dropbox/Research/codes/phasefield/fit_parabolic_f_matlab/para_coef.bin");
         sim.read_comp_phad("/Users/yue/Dropbox/Research/codes/phasefield/fit_parabolic_f_matlab/comp_phad.bin");
@@ -72,7 +72,7 @@ int main(int argc, const char * argv[])
     sim.init_sim(0, 0.001);
     
     sim.read_init_cond("/Users/yue/Dropbox/Research/codes/phasefield/OpenCL/MoelansPhaseFieldFD_buffer/MoelansPhaseFieldFD/phia.bin",
-                       "/Users/yue/Dropbox/Research/codes/phasefield/OpenCL/MoelansPhaseFieldFD_buffer/MoelansPhaseFieldFD/phib.bin",
+//                        "/Users/yue/Dropbox/Research/codes/phasefield/OpenCL/MoelansPhaseFieldFD_buffer/MoelansPhaseFieldFD/phib.bin",
                        "/Users/yue/Dropbox/Research/codes/phasefield/OpenCL/MoelansPhaseFieldFD_buffer/MoelansPhaseFieldFD/comp.bin");
     sim.read_parabolic("/Users/yue/Dropbox/Research/codes/phasefield/fit_parabolic_f_matlab/para_coef.bin");
     sim.read_comp_phad("/Users/yue/Dropbox/Research/codes/phasefield/fit_parabolic_f_matlab/comp_phad.bin");

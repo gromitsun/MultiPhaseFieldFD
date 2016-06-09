@@ -1,5 +1,5 @@
 CC = clang++
-CFLAGS = -Wall -O3 -std=c++11 -I../cl_common/ -I../sim_common/
+CFLAGS = -Wall -O3 -std=c++11 -I../cl_common/ -I../sim_common/ -DDEBUG
 LFLAGS = -framework OpenCL -L../cl_common/ -lclcommon -L../sim_common/ -lsimcommon
 EXE = main.out
 SRC_FILES = $(wildcard *.cpp)
