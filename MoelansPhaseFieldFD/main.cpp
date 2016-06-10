@@ -7,6 +7,7 @@
 //
 
 #include <iostream>
+#include <string>
 #include <cstring>
 #ifdef __APPLE__
 #include <OpenCL/cl.h>
@@ -34,6 +35,11 @@ int main(int argc, const char * argv[])
         if (strcmp(argv[2],"-2")==0)
             sim_dim = 2;
     
+    std::string init_prefix, out_prefix;
+//    init_prefix = "/Users/yue/Dropbox/Research/codes/phasefield/OpenCL/MoelansPhaseFieldFD_buffer/MoelansPhaseFieldFD/";
+    init_prefix = "/Volumes/Ashwin_SSD_2014_03/phasefield_test/512/t_5_6/";
+    out_prefix = "/Volumes/Ashwin_SSD_2014_03/phasefield_test/512/output/";
+    
     if (sim_dim == 2)
     {
         std::cout << "Starting 2D simulation ... \n";
@@ -45,13 +51,13 @@ int main(int argc, const char * argv[])
         
         sim.init_cl(CL_DEVICE_TYPE_GPU, 1);
         
-        sim.init_sim(0, 0.001);
+        sim.init_sim(0, 0.001, out_prefix.c_str());
 
-        sim.read_init_cond("/Users/yue/Dropbox/Research/codes/phasefield/OpenCL/MoelansPhaseFieldFD_buffer/MoelansPhaseFieldFD/phia.bin", 
-//             "/Users/yue/Dropbox/Research/codes/phasefield/OpenCL/MoelansPhaseFieldFD_buffer/MoelansPhaseFieldFD/phib.bin",
-            "/Users/yue/Dropbox/Research/codes/phasefield/OpenCL/MoelansPhaseFieldFD_buffer/MoelansPhaseFieldFD/comp.bin");
-        sim.read_parabolic("/Users/yue/Dropbox/Research/codes/phasefield/fit_parabolic_f_matlab/para_coef.bin");
-        sim.read_comp_phad("/Users/yue/Dropbox/Research/codes/phasefield/fit_parabolic_f_matlab/comp_phad.bin");
+        sim.read_init_cond((init_prefix + "phia.bin").c_str(),
+//                           (init_prefix + "phib.bin").c_str(),
+                           (init_prefix + "comp.bin").c_str());
+        sim.read_parabolic("/Users/yue/Dropbox/Research/codes/phasefield/preprocess/fit_parabolic_f_matlab/para_coef.bin");
+        sim.read_comp_phad("/Users/yue/Dropbox/Research/codes/phasefield/preprocess/fit_parabolic_f_matlab/comp_phad.bin");
         
         sim.build_kernel("kernel_double_2d.cl");
         
@@ -69,13 +75,13 @@ int main(int argc, const char * argv[])
     
     sim.init_cl(CL_DEVICE_TYPE_GPU, 1);
     
-    sim.init_sim(0, 0.001);
+    sim.init_sim(0, 0.001, out_prefix.c_str());
     
-    sim.read_init_cond("/Users/yue/Dropbox/Research/codes/phasefield/OpenCL/MoelansPhaseFieldFD_buffer/MoelansPhaseFieldFD/phia.bin",
-//                        "/Users/yue/Dropbox/Research/codes/phasefield/OpenCL/MoelansPhaseFieldFD_buffer/MoelansPhaseFieldFD/phib.bin",
-                       "/Users/yue/Dropbox/Research/codes/phasefield/OpenCL/MoelansPhaseFieldFD_buffer/MoelansPhaseFieldFD/comp.bin");
-    sim.read_parabolic("/Users/yue/Dropbox/Research/codes/phasefield/fit_parabolic_f_matlab/para_coef.bin");
-    sim.read_comp_phad("/Users/yue/Dropbox/Research/codes/phasefield/fit_parabolic_f_matlab/comp_phad.bin");
+    sim.read_init_cond((init_prefix + "phia.bin").c_str(),
+//                           (init_prefix + "phib.bin").c_str(),
+                       (init_prefix + "comp.bin").c_str());
+    sim.read_parabolic("/Users/yue/Dropbox/Research/codes/phasefield/preprocess/fit_parabolic_f_matlab/para_coef.bin");
+    sim.read_comp_phad("/Users/yue/Dropbox/Research/codes/phasefield/preprocess/fit_parabolic_f_matlab/comp_phad.bin");
     
     sim.build_kernel("kernel_double_3d.cl");
     

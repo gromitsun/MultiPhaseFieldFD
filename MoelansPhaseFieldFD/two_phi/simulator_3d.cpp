@@ -238,7 +238,7 @@ cl_int Simulator_3D<Type>::build_kernel(const char * kernel_file)
 
 
 template <typename Type>
-void Simulator_3D<Type>::init_sim(const Type mean, const Type sigma)
+void Simulator_3D<Type>::init_sim(const Type mean, const Type sigma, const char * outdir)
 {
     /* allocate memory on host */
     _PhiA = new Type[Simulator<Type>::_size];
@@ -262,7 +262,8 @@ void Simulator_3D<Type>::init_sim(const Type mean, const Type sigma)
     _global_size[2]=Simulator<Type>::_dim.z;
     
     /* prepare directory for output */
-    prep_dir("output/");
+    _outdir = outdir;
+    prep_dir(outdir);
     
 }
 
@@ -513,9 +514,9 @@ void Simulator_3D<Type>::restart(const unsigned int nt)
 template <typename Type>
 void Simulator_3D<Type>::writefile()
 {
-    write2bin(time2fname("output/phia_", this->current_step), _PhiA, this->_size);
-    write2bin(time2fname("output/phib_", this->current_step), _PhiB, this->_size);
-    write2bin(time2fname("output/comp_", this->current_step), _Comp, this->_size);
+    write2bin(time2fname((_outdir + "phia_").c_str(), this->current_step), _PhiA, this->_size);
+    write2bin(time2fname((_outdir + "phib_").c_str(), this->current_step), _PhiB, this->_size);
+    write2bin(time2fname((_outdir + "comp_").c_str(), this->current_step), _Comp, this->_size);
 }
 
 /************************************************************/

@@ -23,6 +23,9 @@ private:
     /* Simulation variables */
     Variable<Type> _vars;
     
+    /* Output directory */
+    std::string _outdir = "output/";
+    
     /* Host arrays */
     Type * _PhiA;
     Type * _Comp;
@@ -68,7 +71,7 @@ public:
 
     /* initialization */
     cl_int build_kernel(const char * kernel_file="kernel_float.cl");    // build OpenCL kernel
-    void init_sim(const Type mean, const Type sigma);                   // initialize arrays and mem objects
+    void init_sim(const Type mean, const Type sigma, const char * outdir="output/");                   // initialize arrays and mem objects
     
     /* data transfer between host & device */
     cl_int write_mem();     // write Phi and Comp to buffer     (host   -> device)
