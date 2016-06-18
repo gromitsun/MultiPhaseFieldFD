@@ -35,10 +35,15 @@ int main(int argc, const char * argv[])
         if (strcmp(argv[2],"-2")==0)
             sim_dim = 2;
     
-    std::string init_prefix, out_prefix;
-//    init_prefix = "/Users/yue/Dropbox/Research/codes/phasefield/OpenCL/MoelansPhaseFieldFD_buffer/MoelansPhaseFieldFD/";
-    init_prefix = "/Volumes/Ashwin_SSD_2014_03/phasefield_test/512/t_5_6/";
-    out_prefix = "/Volumes/Ashwin_SSD_2014_03/phasefield_test/512/output/";
+    std::string init_prefix, out_prefix, input_prefix;
+    init_prefix = "/Volumes/Ashwin_SSD_2014_03/phasefield_test/2d_disk/";
+    input_prefix = "/Volumes/Ashwin_SSD_2014_03/phasefield_test/2d_disk/4/";
+    sim_dim = 2;
+    
+//    init_prefix = "/Volumes/Ashwin_SSD_2014_03/phasefield_test/512_512_400/t_5_6/";
+//    input_prefix = "/Volumes/Ashwin_SSD_2014_03/phasefield_test/512_512_400/1/";
+    
+    out_prefix = input_prefix + "output/";
     
     if (sim_dim == 2)
     {
@@ -47,7 +52,7 @@ int main(int argc, const char * argv[])
         Simulator_2D<double> sim{};
         
         // Read input parameters
-        sim.read_input(argv[1]);
+        sim.read_input((input_prefix + argv[1]).c_str());
         
         sim.init_cl(CL_DEVICE_TYPE_GPU, 1);
         
@@ -56,8 +61,8 @@ int main(int argc, const char * argv[])
         sim.read_init_cond((init_prefix + "phia.bin").c_str(),
 //                           (init_prefix + "phib.bin").c_str(),
                            (init_prefix + "comp.bin").c_str());
-        sim.read_parabolic("/Users/yue/Dropbox/Research/codes/phasefield/preprocess/fit_parabolic_f_matlab/para_coef.bin");
-        sim.read_comp_phad("/Users/yue/Dropbox/Research/codes/phasefield/preprocess/fit_parabolic_f_matlab/comp_phad.bin");
+        sim.read_parabolic("/Users/yue/Dropbox/Research/codes/phasefield/preprocess/fit_parabolic_f_matlab/T_817_907/para_coef.bin");
+        sim.read_comp_phad("/Users/yue/Dropbox/Research/codes/phasefield/preprocess/fit_parabolic_f_matlab/T_817_907/comp_phad.bin");
         
         sim.build_kernel("kernel_double_2d.cl");
         
@@ -71,7 +76,7 @@ int main(int argc, const char * argv[])
     Simulator_3D<double> sim{};
     
     // Read input parameters
-    sim.read_input(argv[1]);
+    sim.read_input((input_prefix + argv[1]).c_str());
     
     sim.init_cl(CL_DEVICE_TYPE_GPU, 1);
     
@@ -80,8 +85,8 @@ int main(int argc, const char * argv[])
     sim.read_init_cond((init_prefix + "phia.bin").c_str(),
 //                           (init_prefix + "phib.bin").c_str(),
                        (init_prefix + "comp.bin").c_str());
-    sim.read_parabolic("/Users/yue/Dropbox/Research/codes/phasefield/preprocess/fit_parabolic_f_matlab/para_coef.bin");
-    sim.read_comp_phad("/Users/yue/Dropbox/Research/codes/phasefield/preprocess/fit_parabolic_f_matlab/comp_phad.bin");
+    sim.read_parabolic("/Users/yue/Dropbox/Research/codes/phasefield/preprocess/fit_parabolic_f_matlab/T_817_907/para_coef.bin");
+    sim.read_comp_phad("/Users/yue/Dropbox/Research/codes/phasefield/preprocess/fit_parabolic_f_matlab/T_817_907/comp_phad.bin");
     
     sim.build_kernel("kernel_double_3d.cl");
     

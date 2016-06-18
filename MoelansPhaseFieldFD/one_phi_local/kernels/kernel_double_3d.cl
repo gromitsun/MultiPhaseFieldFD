@@ -106,7 +106,6 @@ __kernel void step_phi_3d(// input/output arrays
                           __global double * Comp,
                           __global double * PhiANext,
                           __global double * U,
-                          __global double * M,
                           // parabolic coefficients of the free energy functions
                           const double a2,
                           const double a1,
@@ -116,8 +115,6 @@ __kernel void step_phi_3d(// input/output arrays
                           const double b0,
                           // physical parameters
                           const double L,
-                          const double Da,
-                          const double Db,
                           const double mk,
                           const double gamma,
                           const double kappa,
@@ -144,13 +141,11 @@ __kernel void step_phi_3d(// input/output arrays
     double compa,  compb;
     parabolic_comp(ha, hb, comp, a2, a1, b2, b1, &compa, &compb);
     
-    // Compute U & M
+    // Compute U
     double u = a2 * compa + a1;
-    double m = ha * Da/a2 + hb * Db/b2;
     
-    // Write U & M to global memory
+    // Write U to global memory
     U[pos] = u;
-    M[pos] = m;
     
     // Step forward Phi
     double laplacian = laplacian_3d(PhiA, phia, dx, pos);
@@ -164,15 +159,25 @@ __kernel void step_phi_3d(// input/output arrays
 }
 
 
-__kernel void step_comp_3d(__global double * Comp,
+__kernel void step_comp_3d(__global double * PhiA,
+                           __global double * Comp,
                            __global double * U,
-                           __global double * M,
+                           __local double * local_M,
+                           // physical parameters
+                           const double Ma,
+                           const double Mb,
                            // simulation parameters
                            const double dx,
                            const double dt)
 {
     // Get coordinates and size
     uint pos = GetPos3(get_global_id(0),get_global_id(1),get_global_id(2),get_global_size(0),get_global_size(1));
+    uint local_pos = GetPos3(get_local_id(0)+1, get_local_id(1)+1, get_local_id(2)+1, get_local_size(0)+2, get_local_size(1)+2);
+    uint local_line = get_local_size(0)+2;
+    uint local_map = (get_local_size(1)+2) * local_line;
+    
+    // Read in Phi
+    double phia = PhiA[pos];
     
     // Read in Comp
     double comp = Comp[pos];
@@ -186,14 +191,134 @@ __kernel void step_comp_3d(__global double * Comp,
     double u_zm = U[pos-get_global_size(0)*get_global_size(1)*ILZ];
     double u_zp = U[pos+get_global_size(0)*get_global_size(1)*ISZ];
     
+    // Calculate h(phia)
+    double phia_sq = sq(phia);
+    double phib_sq = sq(1-phia);
+    double ha = phia_sq/(phia_sq + phib_sq);
+    double hb = 1-ha;
+    
+    // Compute M
+    double m = ha * Ma + hb * Mb;
+    
+    // Write M to local memory
+    local_M[local_pos] = m;
+    
+    // Handle boundaries
+    // x
+    if (get_local_id(0) == 0)
+    {
+        // Read in Phi
+        phia = PhiA[pos-ILX];
+        // Calculate h(phia)
+        phia_sq = sq(phia);
+        phib_sq = sq(1-phia);
+        ha = phia_sq/(phia_sq + phib_sq);
+        hb = 1-ha;
+        
+        // Compute M
+        m = ha * Ma + hb * Mb;
+        
+        // Write M to local memory
+        local_M[local_pos-1] = m;
+        
+    }
+    if (get_local_id(0) == get_local_size(0)-1)
+    {
+        // Read in Phi
+        phia = PhiA[pos+ISX];
+        // Calculate h(phia)
+        phia_sq = sq(phia);
+        phib_sq = sq(1-phia);
+        ha = phia_sq/(phia_sq + phib_sq);
+        hb = 1-ha;
+        
+        // Compute M
+        m = ha * Ma + hb * Mb;
+        
+        // Write M to local memory
+        local_M[local_pos+1] = m;
+        
+    }
+    // y
+    if (get_local_id(1) == 0)
+    {
+        // Read in Phi
+        phia = PhiA[pos-get_global_size(0)*ILY];
+        // Calculate h(phia)
+        phia_sq = sq(phia);
+        phib_sq = sq(1-phia);
+        ha = phia_sq/(phia_sq + phib_sq);
+        hb = 1-ha;
+        
+        // Compute M
+        m = ha * Ma + hb * Mb;
+        
+        // Write M to local memory
+        local_M[local_pos-local_line] = m;
+        
+    }
+    if (get_local_id(1) == get_local_size(1)-1)
+    {
+        // Read in Phi
+        phia = PhiA[pos+get_global_size(0)*ISY];
+        // Calculate h(phia)
+        phia_sq = sq(phia);
+        phib_sq = sq(1-phia);
+        ha = phia_sq/(phia_sq + phib_sq);
+        hb = 1-ha;
+        
+        // Compute M
+        m = ha * Ma + hb * Mb;
+        
+        // Write M to local memory
+        local_M[local_pos+local_line] = m;
+    }
+    // z
+    if (get_local_id(2) == 0)
+    {
+        // Read in Phi
+        phia = PhiA[pos-get_global_size(0)*get_global_size(1)*ILZ];
+        // Calculate h(phia)
+        phia_sq = sq(phia);
+        phib_sq = sq(1-phia);
+        ha = phia_sq/(phia_sq + phib_sq);
+        hb = 1-ha;
+        
+        // Compute M
+        m = ha * Ma + hb * Mb;
+        
+        // Write M to local memory
+        local_M[local_pos-local_map] = m;
+        
+    }
+    if (get_local_id(2) == get_local_size(2)-1)
+    {
+        // Read in Phi
+        phia = PhiA[pos+get_global_size(0)*get_global_size(1)*ISZ];
+        // Calculate h(phia)
+        phia_sq = sq(phia);
+        phib_sq = sq(1-phia);
+        ha = phia_sq/(phia_sq + phib_sq);
+        hb = 1-ha;
+        
+        // Compute M
+        m = ha * Ma + hb * Mb;
+        
+        // Write M to local memory
+        local_M[local_pos+local_map] = m;
+    }
+    
+    // Local memory barrier
+    barrier(CLK_LOCAL_MEM_FENCE);
+    
     // Read in M
-    double m    = M[pos];
-    double m_xm = M[pos-ILX];
-    double m_xp = M[pos+ISX];
-    double m_ym = M[pos-get_global_size(0)*ILY];
-    double m_yp = M[pos+get_global_size(0)*ISY];
-    double m_zm = M[pos-get_global_size(0)*get_global_size(1)*ILZ];
-    double m_zp = M[pos+get_global_size(0)*get_global_size(1)*ISZ];
+    m = local_M[local_pos];
+    double m_xm = local_M[local_pos-1];
+    double m_xp = local_M[local_pos+1];
+    double m_ym = local_M[local_pos-local_line];
+    double m_yp = local_M[local_pos+local_line];
+    double m_zm = local_M[local_pos-local_map];
+    double m_zp = local_M[local_pos+local_map];
     
     // Step forward Comp
     double laplacian = ((m_xp+m)*(u_xp-u)

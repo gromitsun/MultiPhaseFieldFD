@@ -18,8 +18,8 @@ inline double cu(const double x)
 
 /* Macros */
 
-#define GetPos2(x,y,NX) (NX*(y)+(x))
-#define GetPos3(x,y,z,NX,NY) (NX*NY*(z)+NX*(y)+(x))
+#define GetPos2(x,y,NX) ((NX)*(y)+(x))
+#define GetPos3(x,y,z,NX,NY) ((NX)*(NY)*(z)+(NX)*(y)+(x))
 
 #define CalcH(phia) ((phia)*(phia)/((phib)*(phib)+(phia)*(phia)));
 #define CalcM(h, a2, b2, Da, Db) ((h)*(Da)/(a2) + (1-(h))*(Db)/(b2))

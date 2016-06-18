@@ -180,17 +180,17 @@ cl_int Simulator_2D<Type>::build_kernel(const char * kernel_file)
     cl_program program;
 
     // Build program with source (filename) on device+context
-    CHECK_RETURN_N(program, CreateProgram(Simulator<Type>::context, Simulator<Type>::device, kernel_file, err), err);
-    CHECK_RETURN_N(_kernel_step_phi_2d, clCreateKernel(program, "step_phi_2d", &err), err);
-    CHECK_RETURN_N(_kernel_step_comp_2d, clCreateKernel(program, "step_comp_2d", &err), err);
+    CHECK_RETURN(program, CreateProgram(Simulator<Type>::context, Simulator<Type>::device, kernel_file, err), err);
+    CHECK_RETURN(_kernel_step_phi_2d, clCreateKernel(program, "step_phi_2d", &err), err);
+    CHECK_RETURN(_kernel_step_comp_2d, clCreateKernel(program, "step_comp_2d", &err), err);
 
     //Create memory objects on device;
     
-    CHECK_RETURN_N(_mem_PhiA,clCreateBuffer(Simulator<Type>::context, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, _global_size[0]*_global_size[1]*_global_size[2]*sizeof(Type), _PhiA, &err),err)
-    CHECK_RETURN_N(_mem_Comp,clCreateBuffer(Simulator<Type>::context, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, _global_size[0]*_global_size[1]*_global_size[2]*sizeof(Type), _Comp, &err),err)
-    CHECK_RETURN_N(_mem_PhiANext,clCreateBuffer(Simulator<Type>::context, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, _global_size[0]*_global_size[1]*_global_size[2]*sizeof(Type), _PhiA, &err),err)
-    CHECK_RETURN_N(_mem_U,clCreateBuffer(Simulator<Type>::context, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, _global_size[0]*_global_size[1]*_global_size[2]*sizeof(Type), _PhiA, &err),err)
-    CHECK_RETURN_N(_mem_M,clCreateBuffer(Simulator<Type>::context, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, _global_size[0]*_global_size[1]*_global_size[2]*sizeof(Type), _PhiA, &err),err)
+    CHECK_RETURN(_mem_PhiA,clCreateBuffer(Simulator<Type>::context, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, _global_size[0]*_global_size[1]*_global_size[2]*sizeof(Type), _PhiA, &err),err)
+    CHECK_RETURN(_mem_Comp,clCreateBuffer(Simulator<Type>::context, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, _global_size[0]*_global_size[1]*_global_size[2]*sizeof(Type), _Comp, &err),err)
+    CHECK_RETURN(_mem_PhiANext,clCreateBuffer(Simulator<Type>::context, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, _global_size[0]*_global_size[1]*_global_size[2]*sizeof(Type), _PhiA, &err),err)
+    CHECK_RETURN(_mem_U,clCreateBuffer(Simulator<Type>::context, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, _global_size[0]*_global_size[1]*_global_size[2]*sizeof(Type), _PhiA, &err),err)
+    CHECK_RETURN(_mem_M,clCreateBuffer(Simulator<Type>::context, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, _global_size[0]*_global_size[1]*_global_size[2]*sizeof(Type), _PhiA, &err),err)
     
     
     // Set kernel arguments
@@ -362,7 +362,7 @@ void Simulator_2D<Type>::set_temp()
 //    if (_vars.T != _vars.T_gibbs)
 //    {
     /* change temperature */
-    int T_idx = (int)((_vars.T - _paras.T_start_data)/_paras.dT_data);
+    int T_idx = (int)std::round((_vars.T - _paras.T_start_data)/_paras.dT_data);
     _vars.T_gibbs = T_idx * _paras.dT_data + _paras.T_start_data;
     _vars.T_gibbs_next = _vars.T_gibbs + ((_paras.dT_dt > 0) - (_paras.dT_dt < 0))*_paras.dT_recalc;
     

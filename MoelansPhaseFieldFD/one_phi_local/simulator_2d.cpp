@@ -69,16 +69,12 @@ Simulator_2D<Type>::~Simulator_2D()
         clReleaseKernel(_kernel_step_phi_2d);
         clReleaseKernel(_kernel_step_comp_2d);
         clReleaseMemObject(_mem_PhiA);
-        clReleaseMemObject(_mem_PhiB);
         clReleaseMemObject(_mem_Comp);
         clReleaseMemObject(_mem_PhiANext);
-        clReleaseMemObject(_mem_PhiBNext);
         clReleaseMemObject(_mem_U);
-        clReleaseMemObject(_mem_M);
     }
     
     delete [] _PhiA;
-    delete [] _PhiB;
     delete [] _Comp;
     delete [] _para_coef;
     delete [] _comp_phad;
@@ -117,10 +113,9 @@ void Simulator_2D<Type>::read_input(const char * filename)
 
 
 template <typename Type>
-void Simulator_2D<Type>::read_init_cond(const char * filename_phia, const char * filename_phib, const char * filename_comp)
+void Simulator_2D<Type>::read_init_cond(const char * filename_phia, const char * filename_comp)
 {
     read_from_bin(filename_phia, _PhiA, this->_size);
-    read_from_bin(filename_phib, _PhiB, this->_size);
     read_from_bin(filename_comp, _Comp, this->_size);
 }
 
@@ -159,7 +154,6 @@ template <typename Type>
 cl_int Simulator_2D<Type>::write_mem()
 {
     CHECK_ERROR(this->WriteArrayToBuffer(_mem_PhiA, _PhiA, _global_size[0], _global_size[1], _global_size[2]));
-    CHECK_ERROR(this->WriteArrayToBuffer(_mem_PhiB, _PhiB, _global_size[0], _global_size[1], _global_size[2]));
     CHECK_ERROR(this->WriteArrayToBuffer(_mem_Comp, _Comp, _global_size[0], _global_size[1], _global_size[2]));
     return CL_SUCCESS;
 }
@@ -169,7 +163,6 @@ template <typename Type>
 cl_int Simulator_2D<Type>::read_mem()
 {
     CHECK_ERROR(this->ReadArrayFromBuffer(_mem_PhiA, _PhiA, _global_size[0], _global_size[1], _global_size[2]));
-    CHECK_ERROR(this->ReadArrayFromBuffer(_mem_PhiB, _PhiB, _global_size[0], _global_size[1], _global_size[2]));
     CHECK_ERROR(this->ReadArrayFromBuffer(_mem_Comp, _Comp, _global_size[0], _global_size[1], _global_size[2]));
     return CL_SUCCESS;
 }
@@ -193,42 +186,41 @@ cl_int Simulator_2D<Type>::build_kernel(const char * kernel_file)
     //Create memory objects on device;
     
     CHECK_RETURN(_mem_PhiA,clCreateBuffer(Simulator<Type>::context, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, _global_size[0]*_global_size[1]*_global_size[2]*sizeof(Type), _PhiA, &err),err)
-    CHECK_RETURN(_mem_PhiB,clCreateBuffer(Simulator<Type>::context, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, _global_size[0]*_global_size[1]*_global_size[2]*sizeof(Type), _PhiB, &err),err)
     CHECK_RETURN(_mem_Comp,clCreateBuffer(Simulator<Type>::context, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, _global_size[0]*_global_size[1]*_global_size[2]*sizeof(Type), _Comp, &err),err)
     CHECK_RETURN(_mem_PhiANext,clCreateBuffer(Simulator<Type>::context, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, _global_size[0]*_global_size[1]*_global_size[2]*sizeof(Type), _PhiA, &err),err)
-    CHECK_RETURN(_mem_PhiBNext,clCreateBuffer(Simulator<Type>::context, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, _global_size[0]*_global_size[1]*_global_size[2]*sizeof(Type), _PhiB, &err),err)
     CHECK_RETURN(_mem_U,clCreateBuffer(Simulator<Type>::context, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, _global_size[0]*_global_size[1]*_global_size[2]*sizeof(Type), _PhiA, &err),err)
-    CHECK_RETURN(_mem_M,clCreateBuffer(Simulator<Type>::context, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR, _global_size[0]*_global_size[1]*_global_size[2]*sizeof(Type), _PhiA, &err),err)
     
     
     // Set kernel arguments
+    unsigned long int local_ngrids = (_local_size[0]+2)*(_local_size[1]+2)*(_local_size[2]+2);
+    _vars.Ma = _paras.Da / _vars.a2;
+    _vars.Mb = _paras.Db / _vars.b2;
+    
     CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 0, sizeof(cl_mem), &_mem_PhiA))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 1, sizeof(cl_mem), &_mem_PhiB))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 2, sizeof(cl_mem), &_mem_Comp))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 3, sizeof(cl_mem), &_mem_PhiANext))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 4, sizeof(cl_mem), &_mem_PhiBNext))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 5, sizeof(cl_mem), &_mem_U))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 6, sizeof(cl_mem), &_mem_M))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 7, sizeof(Type), &_vars.a2))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 8, sizeof(Type), &_vars.a1))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 9, sizeof(Type), &_vars.a0))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 10, sizeof(Type), &_vars.b2))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 11, sizeof(Type), &_vars.b1))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 12, sizeof(Type), &_vars.b0))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 13, sizeof(Type), &_vars.L))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 14, sizeof(Type), &_paras.Da))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 15, sizeof(Type), &_paras.Db))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 16, sizeof(Type), &_paras.mk))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 17, sizeof(Type), &_paras.gamma))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 18, sizeof(Type), &_paras.kappa))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 19, sizeof(Type), &_paras.dx))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 20, sizeof(Type), &_paras.dt))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 1, sizeof(cl_mem), &_mem_Comp))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 2, sizeof(cl_mem), &_mem_PhiANext))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 3, sizeof(cl_mem), &_mem_U))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 4, sizeof(Type), &_vars.a2))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 5, sizeof(Type), &_vars.a1))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 6, sizeof(Type), &_vars.a0))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 7, sizeof(Type), &_vars.b2))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 8, sizeof(Type), &_vars.b1))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 9, sizeof(Type), &_vars.b0))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 10, sizeof(Type), &_vars.L))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 11, sizeof(Type), &_paras.mk))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 12, sizeof(Type), &_paras.gamma))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 13, sizeof(Type), &_paras.kappa))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 14, sizeof(Type), &_paras.dx))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_phi_2d, 15, sizeof(Type), &_paras.dt))
 
-    CHECK_ERROR(clSetKernelArg(_kernel_step_comp_2d, 0, sizeof(cl_mem), &_mem_Comp))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_comp_2d, 1, sizeof(cl_mem), &_mem_U))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_comp_2d, 2, sizeof(cl_mem), &_mem_M))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_comp_2d, 3, sizeof(Type), &_paras.dx))
-    CHECK_ERROR(clSetKernelArg(_kernel_step_comp_2d, 4, sizeof(Type), &_paras.dt))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_comp_2d, 0, sizeof(cl_mem), &_mem_PhiA))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_comp_2d, 1, sizeof(cl_mem), &_mem_Comp))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_comp_2d, 2, sizeof(cl_mem), &_mem_U))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_comp_2d, 3, sizeof(Type)*local_ngrids, NULL))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_comp_2d, 4, sizeof(Type), &_vars.Ma))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_comp_2d, 5, sizeof(Type), &_vars.Mb))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_comp_2d, 6, sizeof(Type), &_paras.dx))
+    CHECK_ERROR(clSetKernelArg(_kernel_step_comp_2d, 7, sizeof(Type), &_paras.dt))
 
     Simulator<Type>::_cl_initialized = true;
     
@@ -240,14 +232,12 @@ void Simulator_2D<Type>::init_sim(const Type mean, const Type sigma, const char 
 {
     /* allocate memory on host */
     _PhiA = new Type[Simulator<Type>::_size];
-    _PhiB = new Type[Simulator<Type>::_size];
     _Comp = new Type[Simulator<Type>::_size];
     _para_coef = new Type[6 * _paras.nT_data];
     _comp_phad = new Type[2 * _paras.nT_data];
     
     /* initialize Phi & Comp with random numbers */
     gauss(_PhiA, Simulator<Type>::_size, mean, sigma);
-    gauss(_PhiB, Simulator<Type>::_size, mean, sigma);
     gauss(_Comp, Simulator<Type>::_size, mean, sigma);
     
     /* set OpenCL calculation sizes */
@@ -282,8 +272,8 @@ void Simulator_2D<Type>::steps(const Type dt, const unsigned int nsteps, const b
     if ((&dt != &_paras.dt) && (dt != _paras.dt))
     {
         _paras.dt = dt;
-        CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_phi_2d, 20, sizeof(Type), &_paras.dt))
-        CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_comp_2d, 4, sizeof(Type), &_paras.dt))
+        CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_phi_2d, 15, sizeof(Type), &_paras.dt))
+        CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_comp_2d, 7, sizeof(Type), &_paras.dt))
     }
     
     // Variables for timing
@@ -309,14 +299,10 @@ void Simulator_2D<Type>::steps(const Type dt, const unsigned int nsteps, const b
         _mem_PhiA = _mem_PhiANext;
         _mem_PhiANext = _rotate_var;
 
-        _rotate_var = _mem_PhiB;
-        _mem_PhiB = _mem_PhiBNext;
-        _mem_PhiBNext = _rotate_var;
-
         CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_phi_2d, 0, sizeof(cl_mem), &_mem_PhiA))
-        CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_phi_2d, 1, sizeof(cl_mem), &_mem_PhiB))
-        CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_phi_2d, 3, sizeof(cl_mem), &_mem_PhiANext))
-        CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_phi_2d, 4, sizeof(cl_mem), &_mem_PhiBNext))
+        CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_phi_2d, 2, sizeof(cl_mem), &_mem_PhiANext))
+        
+        CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_comp_2d, 0, sizeof(cl_mem), &_mem_PhiA))
 
         // increase global counter
         Simulator<Type>::steps(_paras.dt, 1);
@@ -424,13 +410,18 @@ void Simulator_2D<Type>::set_temp()
     /* debug */
     
     /* reset kernel arguments */
-    CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_phi_2d, 7, sizeof(Type), &_vars.a2));
-    CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_phi_2d, 8, sizeof(Type), &_vars.a1));
-    CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_phi_2d, 9, sizeof(Type), &_vars.a0));
-    CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_phi_2d, 10, sizeof(Type), &_vars.b2));
-    CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_phi_2d, 11, sizeof(Type), &_vars.b1));
-    CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_phi_2d, 12, sizeof(Type), &_vars.b0));
-    CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_phi_2d, 13, sizeof(Type), &_vars.L));
+    CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_phi_2d, 4, sizeof(Type), &_vars.a2));
+    CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_phi_2d, 5, sizeof(Type), &_vars.a1));
+    CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_phi_2d, 6, sizeof(Type), &_vars.a0));
+    CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_phi_2d, 7, sizeof(Type), &_vars.b2));
+    CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_phi_2d, 8, sizeof(Type), &_vars.b1));
+    CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_phi_2d, 9, sizeof(Type), &_vars.b0));
+    CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_phi_2d, 10, sizeof(Type), &_vars.L));
+    
+    _vars.Ma = _paras.Da / _vars.a2;
+    _vars.Mb = _paras.Db / _vars.b2;
+    CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_comp_2d, 4, sizeof(Type), &_vars.Ma));
+    CHECK_ERROR_EXIT(clSetKernelArg(_kernel_step_comp_2d, 5, sizeof(Type), &_vars.Mb));
     
 #ifdef DEBUG
     std::cout << "Calculate Gibbs coefficients at T = " << _vars.T_gibbs << std::endl;
@@ -453,7 +444,6 @@ void Simulator_2D<Type>::run()
         for (int i=0;i<10;i++)
         {
             std::cout << _PhiA[i+this->_dim.x/2-5+(this->_dim.y/2)*this->_dim.x] << "\t";
-            std::cout << _PhiB[i+this->_dim.x/2-5+(this->_dim.y/2)*this->_dim.x] << "\t";
             std::cout << _Comp[i+this->_dim.x/2-5+(this->_dim.y/2)*this->_dim.x] << "\n";
         }
 #endif
@@ -477,7 +467,6 @@ void Simulator_2D<Type>::run()
         for (int i=0;i<10;i++)
         {
             std::cout << _PhiA[i+this->_dim.x/2-5+(this->_dim.y/2)*this->_dim.x] << "\t";
-            std::cout << _PhiB[i+this->_dim.x/2-5+(this->_dim.y/2)*this->_dim.x] << "\t";
             std::cout << _Comp[i+this->_dim.x/2-5+(this->_dim.y/2)*this->_dim.x] << "\n";
         }
 #endif
@@ -514,7 +503,6 @@ template <typename Type>
 void Simulator_2D<Type>::writefile()
 {
     write2bin(time2fname((_outdir + "phia_").c_str(), this->current_step), _PhiA, this->_size);
-    write2bin(time2fname((_outdir + "phib_").c_str(), this->current_step), _PhiB, this->_size);
     write2bin(time2fname((_outdir + "comp_").c_str(), this->current_step), _Comp, this->_size);
 }
 

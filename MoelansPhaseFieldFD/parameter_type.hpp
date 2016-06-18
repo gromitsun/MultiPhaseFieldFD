@@ -53,6 +53,7 @@ struct Variable
     // evolution equation coefficient
     Type m; // symmetric mobility
     Type L; // kinetic coefficient
+    Type Ma, Mb; // mobilities of a and b (= Da/a2 ,Db/b2)
     // other physical variables
     Type T;
     Type T_gibbs;       // temperature used in Gibbs free energy functions
