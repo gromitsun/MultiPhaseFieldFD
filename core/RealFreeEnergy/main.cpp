@@ -41,40 +41,40 @@ int main(int argc, const char * argv[])
     readfile(settings_file, sets);
     
     
-//    if (sets.ndims == 2)
-//    {
-//        std::cout << "Starting 2D simulation ... \n";
-//        
-//        Simulator_2D<double> sim{};
-//        
-//        // Read input parameters
-//        sim.read_input(sets.parameters_file.c_str());
-//        
-//        // Initialize program
-//        sim.init_cl(CL_DEVICE_TYPE_GPU, 1);
-//        
-//        sim.init_sim(0, 0.001, sets.out_prefix.c_str());
-//        
-//        sim.build_kernel("kernel_double_2d.cl"); // contains memcopy host -> device
-//        
-//        // Read data from file
-//        sim.read_init_cond(sets.init_phia.c_str(), sets.init_comp.c_str());
-//        sim.write_mem();
-//        sim.read_comp_phad(sets.comp_phad.c_str());
-//        
-//        // Restart from previous calculations
-//        if (sets.restart)
-//        {
-//            sim.read_init_cond(time2fname(sets.out_prefix + "phia_", sets.restart).c_str(), time2fname(sets.out_prefix + "comp_", sets.restart).c_str());
-//            sim.write_mem();
-//            sim.restart(sets.restart); // set step counter
-//        }
-//        
-//        // Start simulation steps
-//        sim.run();
-//        
-//        return 0;
-//    }
+    if (sets.ndims == 2)
+    {
+        std::cout << "Starting 2D simulation ... \n";
+        
+        Simulator_2D<double> sim{};
+        
+        // Read input parameters
+        sim.read_input(sets.parameters_file.c_str());
+        
+        // Initialize program
+        sim.init_cl(CL_DEVICE_TYPE_GPU, 1);
+        
+        sim.init_sim(0, 0.001, sets.out_prefix.c_str());
+        
+        sim.build_kernel("kernel_double_2d.cl"); // contains memcopy host -> device
+        
+        // Read data from file
+        sim.read_init_cond(sets.init_phia.c_str(), sets.init_comp.c_str());
+        sim.write_mem();
+        sim.read_comp_phad(sets.comp_phad.c_str());
+        
+        // Restart from previous calculations
+        if (sets.restart)
+        {
+            sim.read_init_cond(time2fname(sets.out_prefix + "phia_", sets.restart).c_str(), time2fname(sets.out_prefix + "comp_", sets.restart).c_str());
+            sim.write_mem();
+            sim.restart(sets.restart); // set step counter
+        }
+        
+        // Start simulation steps
+        sim.run();
+        
+        return 0;
+    }
     
     std::cout << "Starting 3D simulation ... \n";
 

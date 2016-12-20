@@ -18,6 +18,7 @@
 #include "alcu_gibbs.hpp"
 
 #define LINEAR_TEMP_INTERP
+#define ONE_D_SIM // 1D local size for 1D simulations
 
 /******************** class initializers ********************/
 
@@ -216,12 +217,15 @@ void Simulator_3D<Type>::init_sim(const Type mean, const Type sigma, const char 
     gauss(_Comp, Simulator<Type>::_size, mean, sigma);
     
     /* set OpenCL calculation sizes */
-//    _local_size[0]=std::min((unsigned int)8,Simulator<Type>::_dim.x);
-//    _local_size[1]=std::min((unsigned int)8,Simulator<Type>::_dim.y);
-//    _local_size[2]=std::min((unsigned int)4,Simulator<Type>::_dim.z);
+#ifndef ONE_D_SIM // 3D local size
+    _local_size[0]=std::min((unsigned int)8,Simulator<Type>::_dim.x);
+    _local_size[1]=std::min((unsigned int)8,Simulator<Type>::_dim.y);
+    _local_size[2]=std::min((unsigned int)4,Simulator<Type>::_dim.z);
+#else // 1D local size
     _local_size[0]=std::min((unsigned int)128,Simulator<Type>::_dim.x);
     _local_size[1]=std::min((unsigned int)1,Simulator<Type>::_dim.y);
     _local_size[2]=std::min((unsigned int)1,Simulator<Type>::_dim.z);
+#endif
     
     _global_size[0]=Simulator<Type>::_dim.x;
     _global_size[1]=Simulator<Type>::_dim.y;

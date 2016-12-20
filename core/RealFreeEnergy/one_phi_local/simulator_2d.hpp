@@ -39,12 +39,11 @@ private:
     cl_mem _mem_PhiA;
     cl_mem _mem_Comp;
     cl_mem _mem_PhiANext;
+    cl_mem _mem_CompNext;
     cl_mem _rotate_var;
-    cl_mem _mem_U;
     
     // OpenCL kernel
-    cl_kernel _kernel_step_phi_2d;
-    cl_kernel _kernel_step_comp_2d;
+    cl_kernel _kernel_step_2d;
     
     // OpenCL sizes
     size_t _local_size[3];
