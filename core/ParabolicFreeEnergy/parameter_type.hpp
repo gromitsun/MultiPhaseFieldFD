@@ -1,6 +1,6 @@
 //
 //  parameter_type.hpp
-//  MoelansPhaseFieldFD
+//  SteinbachPhaseFieldFD
 //
 //  Created by Yue Sun on 6/8/16.
 //  Copyright © 2016 Yue Sun. All rights reserved.

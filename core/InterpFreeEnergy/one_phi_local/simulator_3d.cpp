@@ -1,6 +1,6 @@
 //
 //  simulator_3d.cpp
-//  AllenCahnFD
+//  SteinbachPhaseFieldFD
 //
 //  Created by Yue Sun on 7/20/15.
 //  Copyright (c) 2015 Yue Sun. All rights reserved.

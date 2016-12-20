@@ -1,13 +1,13 @@
 //
 //  simulator_3d.h
-//  AllenCahnFD
+//  SteinbachPhaseFieldFD
 //
 //  Created by Yue Sun on 7/20/15.
 //  Copyright (c) 2015 Yue Sun. All rights reserved.
 //
 
-#ifndef __AllenCahnFD__simulator_3d__
-#define __AllenCahnFD__simulator_3d__
+#ifndef __SteinbachPhaseFieldFD__simulator_3d__
+#define __SteinbachPhaseFieldFD__simulator_3d__
 
 #include "simulator.hpp"
 #include "parameter_type.hpp"
@@ -98,4 +98,4 @@ public:
 };
 
 
-#endif /* defined(__AllenCahnFD__simulator_3d__) */
+#endif /* defined(__SteinbachPhaseFieldFD__simulator_3d__) */

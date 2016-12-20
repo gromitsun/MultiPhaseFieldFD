@@ -1,13 +1,13 @@
 //
 //  alcu_gibbs.hpp
-//  MoelansPhaseFieldFD
+//  SteinbachPhaseFieldFD
 //
 //  Created by Yue Sun on 2/20/16.
 //  Copyright (c) 2016 Yue Sun. All rights reserved.
 //
 
-#ifndef __MoelansPhaseFieldFD__alcu_gibbs__
-#define __MoelansPhaseFieldFD__alcu_gibbs__
+#ifndef __SteinbachPhaseFieldFD__alcu_gibbs__
+#define __SteinbachPhaseFieldFD__alcu_gibbs__
 
 
 #include <cmath>

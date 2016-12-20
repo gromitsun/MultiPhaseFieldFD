@@ -1,13 +1,13 @@
 //
 //  simulator_2d.hpp
-//  MoelansPhaseFieldFD
+//  SteinbachPhaseFieldFD
 //
 //  Created by Yue Sun on 2/20/16.
 //  Copyright (c) 2016 Yue Sun. All rights reserved.
 //
 
-#ifndef __MoelansPhaseFieldFD__simulator_2d__
-#define __MoelansPhaseFieldFD__simulator_2d__
+#ifndef __SteinbachPhaseFieldFD__simulator_2d__
+#define __SteinbachPhaseFieldFD__simulator_2d__
 
 #include "simulator.hpp"
 #include "parameter_type.hpp"
@@ -94,4 +94,4 @@ public:
 };
 
 
-#endif /* defined(__AllenCahnFD__simulator_2d__) */
+#endif /* defined(__SteinbachPhaseFieldFD__simulator_2d__) */
