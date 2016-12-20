@@ -1,0 +1,29 @@
+# equilibrate @ 896.1 with supersaturation alpha = 0.01
+# ------- Parameters -------
+
+### Simulation parameters ###
+nx = 2048                                    # << nx
+ny = 1                                    # << ny
+nz = 1                                    # << nz
+nt = 10000000                               # << nt
+dx = 1.3e-6                                 # << dx
+dt = 2.5e-4                                 # << dt = 0.25*dx*dx/Db*0.5
+dT_recalc = 0.01
+
+### Parabolic coefficients parameters ###
+dT_data = 0.1
+nT_data = 901
+T_start_data = 817
+
+### Physical parameters ###
+Da = 8.3e-13                                      # << Da: diffusion coefficient for phase a
+Db = 8.3e-10                                # << Db: diffusion coefficient for phase b
+sigma = 0.5                                 # << sigma: interfacial free energy
+l = 9.1e-6                                  # << l: interfacial width = 7*dx
+T_start = 896.1              # 623C         # << T_start
+dT_dt = 0 # -0.05 # -0.09259259259       # -5.55555C/min                     # << dT_dt
+
+### Output parameters ###
+t_skip = 100000                               # << t_skip
+
+# ------- End -------

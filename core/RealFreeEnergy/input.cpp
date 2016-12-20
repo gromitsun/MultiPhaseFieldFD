@@ -57,8 +57,9 @@ inline bool parse_parameter(const std::string & line, std::string & key, std::st
 
 /*****************************************************************/
 
-/******************** Actual reading function ********************/
+/******************** Actual reading functions ********************/
 
+// Read input parameters
 template <typename Type>
 void readfile(const std::string & filename,
               unsigned int & nx, unsigned int & ny, unsigned int & nz, 
@@ -154,7 +155,7 @@ void readfile(const std::string & filename,
     std::cout << "Done!" << std::endl;
 
     // Print inputs read in
-    std::cout << "------- Inputs -------" << std::endl;
+    std::cout << "------- Parameters -------" << std::endl;
     
     std::cout << "*** Simulation parameters ***\n";
     std::cout << "nx = " << nx << std::endl;
@@ -184,6 +185,82 @@ void readfile(const std::string & filename,
     std::cout << "------- End -------" << std::endl;
 }
 
+
+// Read paths
+void readfile(const std::string & filename, Settings & sets)
+{
+    std::ifstream fin;
+    std::string s;
+    fin.open(filename.c_str());
+    
+    if (fin.fail())
+    {
+        std::cout << "Failed to open file " << filename << "..." << std::endl;
+        exit(-1);
+    }
+    
+    std::string key, value;
+    std::cout << "Reading inputs from " << filename << "..." << std::endl;
+    while (getline(fin, s))
+    {
+        if (!trim(s).empty() && parse_parameter(s, key, value))
+        {
+            if (key == "parameters_file")
+            {
+                sets.parameters_file = value;
+            }
+            else if (key == "init_phia")
+            {
+                sets.init_phia = value;
+            }
+            else if (key == "init_comp")
+            {
+                sets.init_comp = value;
+            }
+            else if (key == "comp_phad")
+            {
+                sets.comp_phad = value;
+            }
+            else if (key == "out_prefix")
+            {
+                sets.out_prefix = value;
+            }
+            else if (key == "log_file")
+            {
+                sets.log_file = value;
+            }
+            else if (key == "ndims")
+            {
+                sets.ndims = std::stoi(value);
+            }
+            else if (key == "restart")
+            {
+                sets.restart = (unsigned int)std::stoul(value);
+            }
+            else std::cout << key << " = " << value << " not understood!" << std::endl;
+        }
+    }
+    std::cout << "Done!" << std::endl;
+    
+    // Print inputs read in
+    std::cout << "------- Settings -------" << std::endl;
+    
+    std::cout << "*** Paths ***" << std::endl;
+    std::cout << "parameters_file = " << sets.parameters_file << std::endl;
+    std::cout << "init_phia = " << sets.init_phia << std::endl;
+    std::cout << "init_comp = " << sets.init_comp << std::endl;
+    std::cout << "comp_phad = " << sets.comp_phad << std::endl;
+    std::cout << "out_prefix = " << sets.out_prefix << std::endl;
+    std::cout << "log_file = " << sets.log_file << std::endl;
+    
+    std::cout << "*** Others ***" << std::endl;
+    std::cout << "ndims = " << sets.ndims << std::endl;
+    std::cout << "restart = " << sets.restart << std::endl;
+    
+    
+    
+    std::cout << "------- End -------" << std::endl;
+}
 
 /******************** Explicit instantiation ********************/
 template void readfile<double>(const std::string & filename,

@@ -1,0 +1,15 @@
+# ------- Settings -------
+
+### Paths ###
+parameters_file = parameters.txt
+init_phia = /Volumes/Ashwin_SSD_2014_03/phasefield_test_2/flat/sharp_alpha_0.2/phia.bin
+init_comp = /Volumes/Ashwin_SSD_2014_03/phasefield_test_2/flat/sharp_alpha_0.2/comp.bin
+comp_phad = /Users/yue/Dropbox/Research/codes/phasefield/Moelans_phase_field/preprocess/fit_parabolic_f_matlab/output/T_817_907/comp_phad.bin
+out_prefix = /Volumes/Ashwin_SSD_2014_03/phasefield_test_3/
+log_file = log.txt
+
+### Others ###
+ndims = 3
+restart = 0
+
+# ------- End -------

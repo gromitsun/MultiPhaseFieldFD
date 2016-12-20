@@ -10,4 +10,6 @@ void readfile(const std::string & filename,
               unsigned int & nx, unsigned int & ny, unsigned int & nz, 
               Parameter<Type> & paras);
 
+void readfile(const std::string & filename, Settings & sets);
+
 #endif

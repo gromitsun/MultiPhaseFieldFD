@@ -9,6 +9,22 @@
 #ifndef parameter_type_h
 #define parameter_type_h
 
+#include <string>
+
+struct Settings
+{
+    /* Paths */
+    std::string parameters_file;
+    std::string init_phia;
+    std::string init_comp;
+    std::string comp_phad;
+    std::string out_prefix;
+    std::string log_file;
+    
+    /* Others */
+    int ndims = 3;
+    unsigned int restart = 0;
+};
 
 template <typename Type>
 struct Parameter
