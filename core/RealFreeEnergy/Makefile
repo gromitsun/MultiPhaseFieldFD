@@ -12,7 +12,7 @@ all: $(EXE)
 $(EXE): $(OBJ_FILES)
 	$(CC) -o $(EXE) $(OBJ_FILES) $(LFLAGS)
 $(OBJ_FILES): $(SRC_FILES)
-	$(CC) -c $(SRC_FILES) $(CFLAGS) -I$(SUB_DIR)
+	$(CC) -c $(SRC_FILES) $(CFLAGS) -I$(SUB_DIR) -I.
 clean:
 	rm -fv $(EXE)
 	rm -fv *.o

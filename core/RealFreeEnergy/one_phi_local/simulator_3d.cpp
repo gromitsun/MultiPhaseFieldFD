@@ -18,7 +18,7 @@
 #include "alcu_gibbs.hpp"
 
 #define LINEAR_TEMP_INTERP
-#define ONE_D_SIM // 1D local size for 1D simulations
+//#define ONE_D_SIM // 1D local size for 1D simulations
 
 /******************** class initializers ********************/
 
