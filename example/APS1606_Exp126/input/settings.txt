@@ -1,0 +1,16 @@
+# APS1606 Exp126 real data t_4_0
+# ------- Settings -------
+
+### Paths ###
+parameters_file = /Volumes/Ashwin_SSD_2014_03/phase_field_real_data_201803/input/parameters.txt
+init_phia = /Volumes/Ashwin_SSD_2014_03/phase_field_real_data_201803/input/init_cond_t_4_0/phia.bin
+init_comp = /Volumes/Ashwin_SSD_2014_03/phase_field_real_data_201803/input/init_cond_t_4_0/comp.bin
+comp_phad = /Volumes/Ashwin_SSD_2014_03/phase_field_real_data_201803/preprocess/fit_parabolic_f_matlab/output/T_817_907/comp_phad.bin
+out_prefix = /Volumes/Ashwin_SSD_2014_03/phase_field_real_data_201803/output/
+log_file = log.txt
+
+### Others ###
+ndims = 3
+restart = 0
+
+# ------- End -------

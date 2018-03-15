@@ -1,0 +1,29 @@
+# ------- Inputs -------
+
+### Simulation parameters ###
+nx = 256                                    # << nx
+ny = 256                                    # << ny
+nz = 256                                    # << nz
+nt = 1000000                                 # << nt
+dx = 1.3e-6                                # << dx
+dt = 2.5e-4                                 # << dt = 0.25*dx*dx/Db*0.5
+dT_recalc = 0.1
+
+### Parabolic coefficients parameters ###
+dT_data = 0.1
+nT_data = 701
+T_start_data = 827
+
+### Physical parameters ###
+Da = 0                                      # << Da: diffusion coefficient for phase a
+Db = 8.3e-10                                # << Db: diffusion coefficient for phase b
+sigma = 0.5                                 # << sigma: interfacial free energy
+l = 9.1e-6 # 3.25e-6 # 2.27e-9                       # << l: interfacial width = 7*dx
+gamma = 1.5                                 # << gamma: model parameter
+T_start = 896.1 # 837.7 # 895.15    # 622C         # << T_start
+dT_dt = -0.0972 # -0.03333333333      # 2C/min                     # << dT_dt
+
+### Output parameters ###
+t_skip = 10000                               # << t_skip
+
+# ------- End -------
